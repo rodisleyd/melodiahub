@@ -347,34 +347,27 @@ const AppContent: React.FC = () => {
                   }
 
                   return (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                  return (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
                       {topTracks.map((track, idx) => (
                         <div
                           key={`${track.album.id}-${track.id}`}
-                          className="bg-[#1A1A2E] p-4 rounded-2xl hover:bg-[#333333] transition-all group flex flex-col gap-3 relative overflow-hidden shadow-lg border border-[#333333]/50 hover:border-[#FF6B35]/50"
+                          className="bg-[#1A1A2E] p-2 rounded-xl hover:bg-[#333333] transition-all group flex items-center gap-3 border border-[#333333]/50 hover:border-[#FF6B35]/50 cursor-pointer"
+                          onClick={() => handleSelectAlbum(track.album, track.album.tracks.findIndex(t => t.id === track.id))}
                         >
-                          <div className="relative aspect-square rounded-xl overflow-hidden">
-                            <img src={track.album.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <button
-                                onClick={() => handleSelectAlbum(track.album, track.album.tracks.findIndex(t => t.id === track.id))}
-                                className="w-12 h-12 bg-[#FF6B35] rounded-full flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform"
-                              >
-                                <Icons.Play className="w-6 h-6 ml-1" />
-                              </button>
-                            </div>
-                            <div className="absolute top-2 left-2 bg-black/60 px-2 py-1 rounded-lg backdrop-blur-sm">
-                              <span className="text-white font-bold text-xs">#{idx + 1}</span>
+                          <div className="relative w-12 h-12 flex-shrink-0">
+                            <img src={track.album.coverUrl} className="w-full h-full object-cover rounded-md" />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-md text-white">
+                              <Icons.Play className="w-5 h-5" />
                             </div>
                           </div>
 
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-white truncate" title={track.title}>{track.title}</h3>
-                            <p className="text-sm text-[#E0E0E0] truncate">{track.album.artist}</p>
-                            <div className="flex items-center gap-1 mt-1">
-                              <Icons.TrendingUp className="w-3 h-3 text-[#FF6B35]" />
-                              <span className="text-xs text-[#E0E0E0]/60">{track.playCount} plays</span>
+                          <div className="flex-1 min-w-0 overflow-hidden">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <span className="text-xs font-bold text-[#FF6B35]">#{idx + 1}</span>
+                              <h3 className="font-bold text-white text-sm truncate" title={track.title}>{track.title}</h3>
                             </div>
+                            <p className="text-xs text-[#E0E0E0] truncate">{track.album.artist}</p>
                           </div>
                         </div>
                       ))}
