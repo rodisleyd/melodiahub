@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Album, Track } from '../types';
 import { Icons } from '../constants';
 import { dbService } from '../services/dbService';
+import { useAuth } from '../context/AuthContext';
 
 interface AdminDashboardProps {
   onAddAlbum: (album: Album) => void;
@@ -20,7 +21,21 @@ const GENRES = [
 ];
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit, onUpdateAlbum }) => {
-  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'ALBUMS' | 'USERS'>(albumToEdit ? 'ALBUMS' : 'OVERVIEW');
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'ALBUMS' | 'USERS'>('ALBUMS');
+
+  // Set default tab based on permission
+  useEffect(() => {
+    if (!isAdmin) {
+      setActiveTab('ALBUMS');
+    } else if (albumToEdit) {
+      setActiveTab('ALBUMS');
+    } else if (activeTab === 'ALBUMS' && !albumToEdit) {
+      // Keep default if already set, but if we just mounted as admin, maybe OVERVIEW?
+      // Let's rely on state init but this effect runs on mount/updates
+    }
+  }, [isAdmin, albumToEdit]);
 
   // Form State
   const [title, setTitle] = useState('');
@@ -41,9 +56,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit
 
   // Load Data on Mount
   useEffect(() => {
-    loadStats();
-    loadUsers();
-  }, []);
+    if (isAdmin) {
+      loadStats();
+      loadUsers();
+    }
+  }, [isAdmin]);
 
   const loadStats = async () => {
     const data = await dbService.getStats();
@@ -74,6 +91,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit
     await dbService.updateUserRole(userId, newRole);
     loadUsers(); // Refresh
   };
+
+  // ... file handlers ...
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -122,6 +141,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit
       handleCoverSelect(files[0]);
     }
   };
+
+  // ... submit handler ...
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -199,14 +220,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit
     <div className="max-w-6xl mx-auto pb-32 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-4xl font-bold mb-2">Painel Administrativo</h2>
-          <p className="text-[#E0E0E0]">Gerencie todo o ecossistema MelodiaHub.</p>
+          <h2 className="text-4xl font-bold mb-2">{isAdmin ? 'Painel Administrativo' : 'Estúdio de Criação'}</h2>
+          <p className="text-[#E0E0E0]">{isAdmin ? 'Gerencie todo o ecossistema MelodiaHub.' : 'Publique suas obras e compartilhe com o mundo.'}</p>
         </div>
-        <div className="flex bg-[#333333]/30 p-1 rounded-xl">
-          <button onClick={() => setActiveTab('OVERVIEW')} className={`px-6 py-2 rounded-lg font-semibold transition-colors ${activeTab === 'OVERVIEW' ? 'bg-[#FF6B35] text-white' : 'text-[#E0E0E0] hover:text-white'}`}>Visão Geral</button>
-          <button onClick={() => setActiveTab('ALBUMS')} className={`px-6 py-2 rounded-lg font-semibold transition-colors ${activeTab === 'ALBUMS' ? 'bg-[#FF6B35] text-white' : 'text-[#E0E0E0] hover:text-white'}`}>Álbuns</button>
-          <button onClick={() => setActiveTab('USERS')} className={`px-6 py-2 rounded-lg font-semibold transition-colors ${activeTab === 'USERS' ? 'bg-[#FF6B35] text-white' : 'text-[#E0E0E0] hover:text-white'}`}>Usuários</button>
-        </div>
+        {isAdmin && (
+          <div className="flex bg-[#333333]/30 p-1 rounded-xl">
+            <button onClick={() => setActiveTab('OVERVIEW')} className={`px-6 py-2 rounded-lg font-semibold transition-colors ${activeTab === 'OVERVIEW' ? 'bg-[#FF6B35] text-white' : 'text-[#E0E0E0] hover:text-white'}`}>Visão Geral</button>
+            <button onClick={() => setActiveTab('ALBUMS')} className={`px-6 py-2 rounded-lg font-semibold transition-colors ${activeTab === 'ALBUMS' ? 'bg-[#FF6B35] text-white' : 'text-[#E0E0E0] hover:text-white'}`}>Álbuns</button>
+            <button onClick={() => setActiveTab('USERS')} className={`px-6 py-2 rounded-lg font-semibold transition-colors ${activeTab === 'USERS' ? 'bg-[#FF6B35] text-white' : 'text-[#E0E0E0] hover:text-white'}`}>Usuários</button>
+          </div>
+        )}
       </div>
 
       {activeTab === 'OVERVIEW' && (

@@ -19,7 +19,11 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, isOpen, on
     { id: 'MY_ALBUMS', label: 'Meus Álbuns', icon: Icons.Music },
     { id: 'FAVORITES', label: 'Favoritos', icon: Icons.Star },
     { id: 'PLAYLISTS', label: 'Minhas Playlists', icon: Icons.List },
-    ...(user?.role === 'admin' ? [{ id: 'ADMIN_CREATE', label: 'Painel Admin', icon: Icons.Settings }] : []),
+    ...(user ? [{
+      id: 'ADMIN_CREATE',
+      label: user.role === 'admin' ? 'Painel Admin' : 'Publicar Obra',
+      icon: user.role === 'admin' ? Icons.Settings : Icons.Upload
+    }] : []),
     { id: 'SETTINGS', label: 'Configurações', icon: Icons.Settings },
   ];
 
