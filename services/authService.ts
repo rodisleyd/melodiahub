@@ -1,4 +1,3 @@
-
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
@@ -6,21 +5,27 @@ import {
     updateProfile,
     signInWithPopup,
     GoogleAuthProvider,
-    User as FirebaseUser
+    User as FirebaseUser,
+    onAuthStateChanged
 } from 'firebase/auth';
-import { auth } from '../firebase';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../firebase';
 import { User } from '../types';
 
 export const authService = {
     login: async (email: string, password: string): Promise<User> => {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        return mapFirebaseUser(userCredential.user);
+        const user = await mapFirebaseUser(userCredential.user);
+        if (user) await syncUserToFirestore(user);
+        return user as User;
     },
 
     loginWithGoogle: async (): Promise<User> => {
         const provider = new GoogleAuthProvider();
         const userCredential = await signInWithPopup(auth, provider);
-        return mapFirebaseUser(userCredential.user);
+        const user = await mapFirebaseUser(userCredential.user);
+        if (user) await syncUserToFirestore(user);
+        return user as User;
     },
 
     register: async (name: string, email: string, password: string): Promise<User> => {
@@ -28,29 +33,60 @@ export const authService = {
         await updateProfile(userCredential.user, {
             displayName: name
         });
-        // Reload user to get the updated profile
         await userCredential.user.reload();
-        // Return updated user object
         const updatedUser = auth.currentUser || userCredential.user;
-        return mapFirebaseUser(updatedUser);
+        const user = await mapFirebaseUser(updatedUser);
+        if (user) await syncUserToFirestore(user);
+        return user as User;
     },
 
     logout: async (): Promise<void> => {
         await signOut(auth);
     },
 
-    // Helper to transform Firebase User to our App User
-    mapUser: (firebaseUser: FirebaseUser | null): User | null => {
-        return mapFirebaseUser(firebaseUser);
+    mapUser: async (firebaseUser: FirebaseUser | null): Promise<User | null> => {
+        return await mapFirebaseUser(firebaseUser);
     }
 };
 
-function mapFirebaseUser(firebaseUser: FirebaseUser | null): User | null {
+async function syncUserToFirestore(user: User) {
+    try {
+        const userRef = doc(db, 'users', user.id);
+        await setDoc(userRef, {
+            email: user.email,
+            name: user.name,
+            avatar: user.avatar || null,
+        }, { merge: true });
+    } catch (e) {
+        console.error("Error syncing user to Firestore:", e);
+    }
+}
+
+async function mapFirebaseUser(firebaseUser: FirebaseUser | null): Promise<User | null> {
     if (!firebaseUser) return null;
+
+    let role: 'user' | 'admin' = 'user';
+
+    try {
+        const userRef = doc(db, 'users', firebaseUser.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+            const userData = userSnap.data();
+            if (userData.role) {
+                role = userData.role;
+            }
+        }
+        // Hardcode admin for specific email if needed, or dev mode override
+        // if (firebaseUser.email === 'admin@melodiahub.com') role = 'admin';
+    } catch (e) {
+        console.error("Error fetching user role:", e);
+    }
+
     return {
         id: firebaseUser.uid,
         name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
         email: firebaseUser.email || '',
-        avatar: firebaseUser.photoURL || undefined
+        avatar: firebaseUser.photoURL || undefined,
+        role
     };
 }

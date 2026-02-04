@@ -22,8 +22,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-            const appUser = authService.mapUser(firebaseUser);
+        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+            const appUser = await authService.mapUser(firebaseUser);
             setUser(appUser);
             setIsLoading(false);
         });
