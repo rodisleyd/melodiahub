@@ -42,6 +42,8 @@ const AppContent: React.FC = () => {
     isShuffle: false,
   });
 
+  const [splashData, setSplashData] = useState<{ album: Album, trackIndex: number } | null>(null);
+
   const { isAuthenticated, isLoading: isAuthLoading, logout } = useAuth();
 
   // Load Albums and Playlists from Firestore
@@ -91,12 +93,8 @@ const AppContent: React.FC = () => {
       if (album) {
         const trackIndex = album.tracks.findIndex((t) => t.id === trackId);
         if (trackIndex !== -1) {
-          handleSelectAlbum(album, trackIndex);
-          // Clean URL to avoid re-triggering on refresh if we wanted, 
-          // but keeping it might be fine to allow bookmarking. 
-          // For now, let's keep it so user sees what they shared.
-          // actually, checking persistent state might be annoying.
-          // Let's clear the params to be clean so it doesn't replay on refresh purely by accident if user navigates.
+          // Instead of auto-playing (which blocks), show splash screen
+          setSplashData({ album, trackIndex });
           window.history.replaceState({}, '', window.location.pathname);
         }
       }
@@ -663,6 +661,44 @@ const AppContent: React.FC = () => {
         onCreatePlaylist={handleCreatePlaylist}
         onToBeAddedToPlaylist={handleAddToPlaylist}
       />
+
+      {/* SPLASH SCREEN FOR DEEP LINKING */}
+      {splashData && (
+        <div
+          className="fixed inset-0 z-[100] bg-[#1A1A2E] flex flex-col items-center justify-center p-6 animate-in fade-in duration-500 cursor-pointer"
+          onClick={() => {
+            handleSelectAlbum(splashData.album, splashData.trackIndex);
+            setSplashData(null);
+          }}
+        >
+          <div className="text-center space-y-8 max-w-md w-full animate-in zoom-in-90 duration-500 delay-150">
+            <div className="relative group mx-auto w-64 h-64 md:w-80 md:h-80">
+              <img
+                src={splashData.album.coverUrl}
+                alt={splashData.album.title}
+                className="w-full h-full object-cover rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.6)] group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/10 transition-colors rounded-3xl">
+                <div className="w-20 h-20 bg-[#FF6B35] rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,107,53,0.6)] animate-pulse">
+                  <Icons.Play className="w-10 h-10 text-white ml-2" />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight">
+                {splashData.album.tracks[splashData.trackIndex].title}
+              </h2>
+              <p className="text-xl text-[#FF6B35] font-medium">
+                {splashData.album.artist}
+              </p>
+              <p className="text-[#E0E0E0]/60 text-sm uppercase tracking-widest pt-4">
+                Toque em qualquer lugar para ouvir
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
