@@ -332,7 +332,7 @@ const AppContent: React.FC = () => {
 
             <section className="mb-12">
               <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
-                <Icons.TrendingUp className="text-[#FF6B35]" />
+                <Icons.TrendingUp className="w-8 h-8 text-[#FF6B35]" />
                 Em Alta
               </h2>
 
