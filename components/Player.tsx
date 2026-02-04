@@ -44,7 +44,14 @@ const Player: React.FC<PlayerProps> = ({
   useEffect(() => {
     if (audioRef.current) {
       if (isPlaying) {
-        audioRef.current.play().catch(e => console.error("Falha na reprodução:", e));
+        audioRef.current.play().catch(e => {
+          console.error("Falha na reprodução:", e);
+          // Se falhar (ex: bloqueio de autoplay), reverte o estado para "Pausado"
+          // para o usuário clicar manualmente.
+          if (e.name === 'NotAllowedError') {
+            onTogglePlay();
+          }
+        });
       } else {
         audioRef.current.pause();
       }
