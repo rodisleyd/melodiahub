@@ -14,7 +14,8 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, track, album }
     if (!track || !album) return null;
 
     const shareText = `Confira "${track.title}" de ${album.artist} no MelodiaHub!`;
-    const shareUrl = window.location.href; // In a real app, this would be a deep link
+    const baseUrl = window.location.origin;
+    const shareUrl = `${baseUrl}/?albumId=${album.id}&trackId=${track.id}`;
 
     const shareOptions = [
         {

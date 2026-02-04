@@ -78,6 +78,31 @@ const AppContent: React.FC = () => {
     }));
   };
 
+  // Deep Linking Handler
+  useEffect(() => {
+    if (isDataLoading || albums.length === 0) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const albumId = params.get('albumId');
+    const trackId = params.get('trackId');
+
+    if (albumId && trackId) {
+      const album = albums.find((a) => a.id === albumId);
+      if (album) {
+        const trackIndex = album.tracks.findIndex((t) => t.id === trackId);
+        if (trackIndex !== -1) {
+          handleSelectAlbum(album, trackIndex);
+          // Clean URL to avoid re-triggering on refresh if we wanted, 
+          // but keeping it might be fine to allow bookmarking. 
+          // For now, let's keep it so user sees what they shared.
+          // actually, checking persistent state might be annoying.
+          // Let's clear the params to be clean so it doesn't replay on refresh purely by accident if user navigates.
+          window.history.replaceState({}, '', window.location.pathname);
+        }
+      }
+    }
+  }, [isDataLoading, albums]);
+
   const handleToggleFavorite = async (albumId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     // Optimistic update
