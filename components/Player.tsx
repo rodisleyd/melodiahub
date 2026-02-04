@@ -11,6 +11,7 @@ interface PlayerProps {
   onVolumeChange: (vol: number) => void;
   onShare: (track: Track, album: Album) => void;
   onToggleShuffle: () => void;
+  onTrackPlay?: (track: Track, album: Album) => void;
 }
 
 const Player: React.FC<PlayerProps> = ({
@@ -21,10 +22,12 @@ const Player: React.FC<PlayerProps> = ({
   onVolumeChange,
   onShare,
   onToggleShuffle,
+  onTrackPlay
 }) => {
   const { currentAlbum, currentTrackIndex, isPlaying, volume, isShuffle } = playerState;
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
+  const playCountedRef = useRef<string | null>(null); // Track ID of last counted play
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
@@ -39,6 +42,17 @@ const Player: React.FC<PlayerProps> = ({
     const nextIndex = (currentTrackIndex + 1) % currentAlbum.tracks.length;
     return currentAlbum.tracks[nextIndex].title;
   };
+
+  // Play Counting Logic
+  useEffect(() => {
+    if (isPlaying && currentTrack && currentAlbum && onTrackPlay) {
+      // Only count if we haven't counted this track in this session yet
+      if (playCountedRef.current !== currentTrack.id) {
+        onTrackPlay(currentTrack, currentAlbum);
+        playCountedRef.current = currentTrack.id;
+      }
+    }
+  }, [isPlaying, currentTrack, currentAlbum, onTrackPlay]);
 
   // Controle do áudio via estado isPlaying
   useEffect(() => {

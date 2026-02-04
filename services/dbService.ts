@@ -8,7 +8,10 @@ import {
     doc,
     onSnapshot,
     QuerySnapshot,
-    DocumentData
+    DocumentData,
+    runTransaction,
+    increment,
+    getDoc
 } from 'firebase/firestore';
 import {
     ref,
@@ -87,6 +90,67 @@ export const dbService = {
         const snapshot = await uploadBytes(storageRef, file);
         const downloadURL = await getDownloadURL(snapshot.ref);
         return downloadURL;
+    },
+
+    // Stats & Ranking
+    incrementPlayCount: async (albumId: string, trackId: string): Promise<void> => {
+        try {
+            const albumRef = doc(db, ALBUMS_COLLECTION, albumId);
+            const statsRef = doc(db, 'stats', 'global');
+
+            await runTransaction(db, async (transaction) => {
+                const albumDoc = await transaction.get(albumRef);
+                if (!albumDoc.exists()) throw "Album does not exist!";
+
+                const albumData = albumDoc.data() as Album;
+                const newTracks = albumData.tracks.map(t => {
+                    if (t.id === trackId) {
+                        return { ...t, playCount: (t.playCount || 0) + 1 };
+                    }
+                    return t;
+                });
+
+                // Increment Album Play Count
+                const newAlbumPlayCount = (albumData.playCount || 0) + 1;
+
+                transaction.update(albumRef, {
+                    tracks: newTracks,
+                    playCount: newAlbumPlayCount
+                });
+
+                // Increment Global Stats
+                transaction.set(statsRef, {
+                    totalPlays: increment(1)
+                }, { merge: true });
+            });
+        } catch (e) {
+            console.error("Error incrementing play count: ", e);
+        }
+    },
+
+    getStats: async (): Promise<{ totalUsers: number, totalPlays: number, totalAlbums: number }> => {
+        const statsRef = doc(db, 'stats', 'global');
+        const statsSnap = await getDoc(statsRef);
+
+        const albumsSnap = await getDocs(collection(db, ALBUMS_COLLECTION));
+        const usersSnap = await getDocs(collection(db, 'users'));
+
+        return {
+            totalPlays: statsSnap.exists() ? statsSnap.data().totalPlays || 0 : 0,
+            totalAlbums: albumsSnap.size,
+            totalUsers: usersSnap.size
+        };
+    },
+
+    // User Management
+    updateUserRole: async (userId: string, role: 'user' | 'admin'): Promise<void> => {
+        const userRef = doc(db, 'users', userId);
+        await updateDoc(userRef, { role });
+    },
+
+    getAllUsers: async (): Promise<any[]> => {
+        const querySnapshot = await getDocs(collection(db, 'users'));
+        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     }
 };
 

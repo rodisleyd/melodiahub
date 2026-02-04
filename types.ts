@@ -5,6 +5,7 @@ export interface Track {
   duration: string;
   url: string;
   isFavorite?: boolean;
+  playCount?: number;
 }
 
 export interface Album {
@@ -16,6 +17,7 @@ export interface Album {
   tracks: Track[];
   year: number;
   isFavorite?: boolean;
+  playCount?: number;
 }
 
 export interface User {
@@ -23,6 +25,7 @@ export interface User {
   name: string;
   email: string;
   avatar?: string;
+  role?: 'user' | 'admin';
 }
 
 export interface Playlist {

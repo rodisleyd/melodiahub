@@ -178,7 +178,10 @@ const AppContent: React.FC = () => {
 
   const filteredAlbums = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
-    if (!query) return albums;
+    if (!query) {
+      // Sort by popularity by default
+      return [...albums].sort((a, b) => (b.playCount || 0) - (a.playCount || 0));
+    }
     return albums.filter(album =>
       album.title.toLowerCase().includes(query) ||
       album.artist.toLowerCase().includes(query) ||
@@ -326,6 +329,47 @@ const AppContent: React.FC = () => {
                 )}
               </div>
             </div>
+
+            <section className="mb-12">
+              <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
+                <Icons.TrendingUp className="text-[#FF6B35]" />
+                Em Alta
+              </h2>
+
+              <div className="bg-[#333333]/20 rounded-3xl p-6 border border-[#333333]">
+                {/* Top Tracks Logic */}
+                {(() => {
+                  const allTracks = albums.flatMap(a => a.tracks.map(t => ({ ...t, album: a })));
+                  const topTracks = allTracks.sort((a, b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 5);
+
+                  if (topTracks.length === 0 || !topTracks[0].playCount) {
+                    return <p className="text-[#E0E0E0]/50 italic">As estatísticas aparecerão conforme as músicas forem tocadas.</p>;
+                  }
+
+                  return (
+                    <div className="space-y-3">
+                      {topTracks.map((track, idx) => (
+                        <div key={`${track.album.id}-${track.id}`} className="flex items-center justify-between p-3 rounded-xl hover:bg-[#333333]/40 transition-colors group cursor-pointer" onClick={() => handleSelectAlbum(track.album, track.album.tracks.findIndex(t => t.id === track.id))}>
+                          <div className="flex items-center gap-4">
+                            <span className="text-2xl font-bold text-[#FF6B35] w-8 text-center">{idx + 1}</span>
+                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-[#333333]">
+                              <img src={track.album.coverUrl} className="w-full h-full object-cover" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-white">{track.title}</p>
+                              <p className="text-xs text-[#E0E0E0]">{track.album.artist} • <span className="text-[#FF6B35]">{track.playCount} plays</span></p>
+                            </div>
+                          </div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Icons.Play className="w-8 h-8 text-[#FF6B35]" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </div>
+            </section>
 
             <section>
               <div className="flex items-center justify-between mb-8">
@@ -645,6 +689,9 @@ const AppContent: React.FC = () => {
         onVolumeChange={handleVolumeChange}
         onShare={(track, album) => handleTrackAction('share', track, album)}
         onToggleShuffle={handleToggleShuffle}
+        onTrackPlay={(track, album) => {
+          dbService.incrementPlayCount(album.id, track.id);
+        }}
       />
 
       <ShareModal
