@@ -6,9 +6,9 @@ import { dbService } from '../services/dbService';
 import { useAuth } from '../context/AuthContext';
 
 interface AdminDashboardProps {
-  onAddAlbum: (album: Album) => void;
+  onAddAlbum: (album: Album) => Promise<void>;
   albumToEdit?: Album | null;
-  onUpdateAlbum?: (album: Album) => void;
+  onUpdateAlbum?: (album: Album) => Promise<void>;
 }
 
 const GENRES = [
@@ -189,10 +189,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit
       };
 
       if (albumToEdit && onUpdateAlbum) {
-        onUpdateAlbum(albumData);
+        await onUpdateAlbum(albumData);
         alert('Álbum atualizado com sucesso!');
       } else {
-        onAddAlbum(albumData);
+        await onAddAlbum(albumData);
         alert('Álbum criado com sucesso!');
         // Reset
         setTitle('');

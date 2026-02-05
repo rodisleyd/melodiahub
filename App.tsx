@@ -150,10 +150,9 @@ const AppContent: React.FC = () => {
       const guestId = localStorage.getItem('melodiahub_guest_id');
       const effectiveUserId = user?.id || guestId || 'anonymous';
 
-      console.log("Tentando curtir com ID:", effectiveUserId);
       await dbService.toggleLike(effectiveUserId, albumId, trackId);
     } catch (e) {
-      alert("Erro ao curtir: " + (e instanceof Error ? e.message : String(e)));
+      console.error("Erro ao curtir:", e);
     }
   };
 
