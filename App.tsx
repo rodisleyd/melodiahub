@@ -51,6 +51,11 @@ const AppContent: React.FC = () => {
 
   // Load Albums and Playlists from Firestore
   useEffect(() => {
+    // Initialize Guest ID for anonymous likes
+    if (!localStorage.getItem('melodiahub_guest_id')) {
+      localStorage.setItem('melodiahub_guest_id', 'guest_' + Math.random().toString(36).substr(2, 9));
+    }
+
     const unsubscribeAlbums = dbService.subscribeToAlbums((fetchedAlbums) => {
       setAlbums(fetchedAlbums);
       setIsDataLoading(false);
@@ -141,11 +146,8 @@ const AppContent: React.FC = () => {
   };
 
   const handleLike = async (albumId: string, trackId?: string) => {
-    if (!isAuthenticated || !user) {
-      setCurrentView('LOGIN');
-      return;
-    }
-    await dbService.toggleLike(user.id, albumId, trackId);
+    const effectiveUserId = user?.id || localStorage.getItem('melodiahub_guest_id') || 'anonymous';
+    await dbService.toggleLike(effectiveUserId, albumId, trackId);
   };
 
   const handleNext = useCallback(() => {
