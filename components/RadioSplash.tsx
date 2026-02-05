@@ -9,7 +9,7 @@ interface RadioSplashProps {
 const RadioSplash: React.FC<RadioSplashProps> = ({ onStart }) => {
     return (
         <div
-            className="fixed inset-0 z-[110] bg-[#1A1A2E]/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 animate-in fade-in duration-700 cursor-pointer"
+            className="fixed inset-0 z-[110] bg-[#1A1A2E]/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 cursor-pointer"
             onClick={onStart}
         >
             <div className="text-center space-y-10 max-w-md w-full animate-in zoom-in-95 duration-700">

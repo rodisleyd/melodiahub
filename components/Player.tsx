@@ -41,15 +41,16 @@ const Player: React.FC<PlayerProps> = ({
 
   // Calculate next track for display
   const getNextTrackTitle = () => {
-    if (!currentAlbum || !currentAlbum.tracks.length) return '';
+    if (!currentAlbum || !currentAlbum.tracks || !currentAlbum.tracks.length) return '';
     if (isShuffle) {
       return "Modo Aleatório";
     }
     if (isRadioMode) {
       return "Radio MelodyHUB";
     }
-    const nextIndex = (currentTrackIndex + 1) % currentAlbum.tracks.length;
-    return currentAlbum.tracks[nextIndex].title;
+    const tracks = currentAlbum.tracks || [];
+    const nextIndex = (currentTrackIndex + 1) % tracks.length;
+    return tracks[nextIndex]?.title || '';
   };
 
   // Play Counting Logic

@@ -77,7 +77,7 @@ const AlbumCard: React.FC<AlbumCardProps> = ({
             <div>
                 <h3 className="text-xl font-semibold mb-1 group-hover:text-[#FF6B35] transition-colors">{album.title}</h3>
                 <p className="text-[#E0E0E0] text-sm font-medium">{album.artist}</p>
-                <p className="text-[#333333] text-xs font-semibold mt-2">{album.tracks.length} Músicas • {album.year}</p>
+                <p className="text-[#333333] text-xs font-semibold mt-2">{(album.tracks || []).length} Músicas • {album.year}</p>
 
                 <button
                     onClick={(e) => {
@@ -92,7 +92,7 @@ const AlbumCard: React.FC<AlbumCardProps> = ({
                 {/* Lista de Faixas Expandida */}
                 {isExpanded && (
                     <div onClick={(e) => e.stopPropagation()} className="mt-4 pt-4 border-t border-[#333333]/50 space-y-2 animate-in slide-in-from-top-2 cursor-default">
-                        {album.tracks.length === 0 ? (
+                        {(!album.tracks || album.tracks.length === 0) ? (
                             <p className="text-sm text-[#E0E0E0]/50 italic text-center">Sem faixas.</p>
                         ) : (
                             album.tracks.map((track, idx) => (

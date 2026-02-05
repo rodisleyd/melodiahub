@@ -17,6 +17,7 @@ import { dbService } from './services/dbService';
 import RadioSplash from './components/RadioSplash';
 
 const AppContent: React.FC = () => {
+  console.log("AppContent rendering...");
   const [albums, setAlbums] = useState<Album[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([
     { id: '1', name: 'Minhas Curtidas', tracks: [], coverUrl: 'https://placehold.co/600x600?text=Playlist' }
@@ -119,7 +120,8 @@ const AppContent: React.FC = () => {
     if (albumId && trackId) {
       const album = albums.find((a) => a.id === albumId);
       if (album) {
-        const trackIndex = album.tracks.findIndex((t) => t.id === trackId);
+        const tracks = album.tracks || [];
+        const trackIndex = tracks.findIndex((t) => t.id === trackId);
         if (trackIndex !== -1) {
           // Instead of auto-playing (which blocks), show splash screen
           setSplashData({ album, trackIndex });
@@ -335,7 +337,7 @@ const AppContent: React.FC = () => {
         return <Register onViewChange={setCurrentView} />;
       case 'EXPLORE':
         return (
-          <div className="animate-in fade-in slide-in-from-right-4 duration-700">
+          <div className="">
             <header className="mb-10">
               <h1 className="text-5xl font-semibold tracking-tight mb-4">Descubra novos sons</h1>
               <p className="text-[#E0E0E0] text-lg max-w-2xl">
@@ -377,7 +379,7 @@ const AppContent: React.FC = () => {
               <div className="bg-[#333333]/20 rounded-3xl p-6 border border-[#333333]">
                 {/* Top Tracks Logic */}
                 {(() => {
-                  const allTracks = albums.flatMap(a => a.tracks.map(t => ({ ...t, album: a })));
+                  const allTracks = albums.flatMap(a => (a.tracks || []).map(t => ({ ...t, album: a })));
                   const topTracks = allTracks.sort((a, b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 5);
 
                   if (topTracks.length === 0 || !topTracks[0].playCount) {
@@ -391,7 +393,10 @@ const AppContent: React.FC = () => {
                         <div
                           key={`${track.album.id}-${track.id}`}
                           className="bg-[#1A1A2E] p-2 rounded-xl hover:bg-[#333333] transition-all group flex items-center gap-3 border border-[#333333]/50 hover:border-[#FF6B35]/50 cursor-pointer"
-                          onClick={() => handleSelectAlbum(track.album, track.album.tracks.findIndex(t => t.id === track.id))}
+                          onClick={() => {
+                            const trackIndex = (track.album.tracks || []).findIndex(t => t.id === track.id);
+                            handleSelectAlbum(track.album, trackIndex !== -1 ? trackIndex : 0);
+                          }}
                         >
                           <div className="relative w-12 h-12 flex-shrink-0">
                             <img src={track.album.coverUrl} className="w-full h-full object-cover rounded-md" />
@@ -481,9 +486,9 @@ const AppContent: React.FC = () => {
               <div className="mt-16">
                 <h2 className="text-2xl font-semibold mb-6 border-b-2 border-[#FF6B35] pb-2 inline-block">Músicas Curtidas</h2>
                 <div className="bg-[#333333]/20 rounded-3xl p-6 border border-[#333333]">
-                  {albums.flatMap(a => a.tracks.map(t => ({ ...t, album: a }))).filter(t => t.isFavorite).length > 0 ? (
+                  {albums.flatMap(a => (a.tracks || []).map(t => ({ ...t, album: a }))).filter(t => t.isFavorite).length > 0 ? (
                     <div className="space-y-2">
-                      {albums.flatMap(a => a.tracks.map(t => ({ ...t, album: a })))
+                      {albums.flatMap(a => (a.tracks || []).map(t => ({ ...t, album: a })))
                         .filter(t => t.isFavorite)
                         .map((track, idx) => (
                           <div key={`${track.album.id}-${track.id}`} className="flex items-center justify-between p-3 rounded-xl hover:bg-[#333333]/40 transition-colors group">
@@ -506,7 +511,8 @@ const AppContent: React.FC = () => {
                               <button
                                 onClick={() => {
                                   // Find track in original album to play with context
-                                  const trackIndex = track.album.tracks.findIndex(t => t.id === track.id);
+                                  const tracks = track.album.tracks || [];
+                                  const trackIndex = tracks.findIndex(t => t.id === track.id);
                                   handleSelectAlbum(track.album, trackIndex !== -1 ? trackIndex : 0);
                                 }}
                                 className="p-2 text-[#E0E0E0] hover:text-[#FF6B35] hover:bg-[#333333] rounded-full transition-colors"
@@ -794,7 +800,7 @@ const AppContent: React.FC = () => {
 
             <div className="space-y-3">
               <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight">
-                {splashData.album.tracks[splashData.trackIndex].title}
+                {splashData.album.tracks?.[splashData.trackIndex]?.title || 'Música Desconhecida'}
               </h2>
               <p className="text-xl text-[#FF6B35] font-medium">
                 {splashData.album.artist}
