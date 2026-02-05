@@ -1,15 +1,18 @@
 
-import React, { useState, useRef } from 'react';
-import { Icons } from '../constants';
+import { dbService } from '../services/dbService';
+import { useAuth } from '../context/AuthContext';
 
 interface SettingsProps {
     onLogout?: () => void;
 }
 
 const Settings: React.FC<SettingsProps> = ({ onLogout }) => {
-    const [avatarUrl, setAvatarUrl] = useState<string>('');
-    const [name, setName] = useState('DevArchitect AI');
-    const [email] = useState('admin@melodiahub.com'); // Read-only for now
+    const { user, updateProfile } = useAuth();
+    const [avatarUrl, setAvatarUrl] = useState<string>(user?.avatar || '');
+    const [name, setName] = useState(user?.name || '');
+    const [email] = useState(user?.email || '');
+    const [hasChanges, setHasChanges] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
     const [audioQuality, setAudioQuality] = useState('High');
     const [crossfade, setCrossfade] = useState(true);
@@ -17,11 +20,52 @@ const Settings: React.FC<SettingsProps> = ({ onLogout }) => {
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Sync local state if user changes/loads
+    useEffect(() => {
+        if (user) {
+            setAvatarUrl(user.avatar || '');
+            setName(user.name);
+            if (name !== user.name) { /* no-op: user typing overrides */ }
+        }
+    }, [user?.id]); // Only reset on user ID change to avoid wiping typing
+
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            const url = URL.createObjectURL(file);
-            setAvatarUrl(url);
+            try {
+                // Optimistic UI
+                const tempUrl = URL.createObjectURL(file);
+                setAvatarUrl(tempUrl);
+
+                // Upload real file
+                const url = await dbService.uploadFile(file, 'avatars');
+                await updateProfile({ avatar: url });
+                alert('Avatar atualizado!');
+            } catch (error) {
+                console.error("Error updating avatar:", error);
+                alert("Erro ao atualizar avatar.");
+                setAvatarUrl(user?.avatar || ''); // Revert
+            }
+        }
+    };
+
+    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setName(e.target.value);
+        setHasChanges(e.target.value !== user?.name);
+    };
+
+    const saveProfile = async () => {
+        if (!hasChanges) return;
+        setIsSaving(true);
+        try {
+            await updateProfile({ name });
+            setHasChanges(false);
+            alert('Perfil atualizado com sucesso!');
+        } catch (e) {
+            console.error(e);
+            alert('Erro ao atualizar perfil.');
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -73,21 +117,33 @@ const Settings: React.FC<SettingsProps> = ({ onLogout }) => {
 
                             <div className="mt-4 text-center w-full">
                                 <label className="block text-xs font-medium text-[#E0E0E0] mb-1 text-left px-2">Nome de Exibição</label>
-                                <input
-                                    type="text"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    className="w-full bg-[#1A1A2E] border border-[#333333] rounded-xl px-4 py-2 focus:outline-none focus:border-[#FF6B35] text-center"
-                                />
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={name}
+                                        onChange={handleNameChange}
+                                        className="w-full bg-[#1A1A2E] border border-[#333333] rounded-xl px-4 py-2 focus:outline-none focus:border-[#FF6B35]"
+                                    />
+                                </div>
+                                {hasChanges && (
+                                    <button
+                                        onClick={saveProfile}
+                                        disabled={isSaving}
+                                        className="mt-2 text-xs bg-[#FF6B35] text-white px-4 py-2 rounded-lg hover:bg-[#ff8559] transition-colors disabled:opacity-50"
+                                    >
+                                        {isSaving ? 'Salvando...' : 'Salvar Alterações'}
+                                    </button>
+                                )}
                             </div>
 
-                            <div className="mt-4 text-center w-full opacity-60 pointer-events-none">
+                            <div className="mt-4 text-center w-full opacity-60">
                                 <label className="block text-xs font-medium text-[#E0E0E0] mb-1 text-left px-2">E-mail</label>
                                 <input
                                     type="text"
                                     value={email}
                                     readOnly
-                                    className="w-full bg-[#1A1A2E] border border-[#333333] rounded-xl px-4 py-2"
+                                    title="E-mail não pode ser alterado"
+                                    className="w-full bg-[#1A1A2E] border border-[#333333] rounded-xl px-4 py-2 cursor-not-allowed"
                                 />
                             </div>
                         </div>
@@ -162,10 +218,13 @@ const Settings: React.FC<SettingsProps> = ({ onLogout }) => {
                                 <Icons.SkipForward className="w-4 h-4 rotate-90 opacity-50 group-hover:opacity-100 transition-opacity" />
                             </button>
 
-                            <button className="w-full text-left px-4 py-3 bg-[#1A1A2E] hover:bg-[#333333] rounded-xl transition-colors border border-[#333333] flex justify-between items-center group">
-                                <span>Gerenciar Assinatura</span>
-                                <Icons.SkipForward className="w-4 h-4 rotate-90 opacity-50 group-hover:opacity-100 transition-opacity" />
-                            </button>
+                            <div className="w-full text-left px-4 py-3 bg-[#1A1A2E]/50 rounded-xl border border-[#333333] flex justify-between items-center opacity-80 cursor-default">
+                                <div>
+                                    <span className="block text-sm font-medium">Plano Atual</span>
+                                    <span className="text-xs text-[#E0E0E0]/60">Gratuito (Vitalício)</span>
+                                </div>
+                                <span className="text-xs bg-[#333333] text-[#E0E0E0] px-2 py-1 rounded">Gerenciar</span>
+                            </div>
 
                             <div className="pt-4">
                                 <button

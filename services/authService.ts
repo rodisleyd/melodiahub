@@ -46,6 +46,22 @@ export const authService = {
 
     mapUser: async (firebaseUser: FirebaseUser | null): Promise<User | null> => {
         return await mapFirebaseUser(firebaseUser);
+    },
+
+    updateUserProfile: async (user: User, updates: { name?: string; avatar?: string; }): Promise<User> => {
+        if (!auth.currentUser) throw new Error("No user logged in");
+
+        // Update Firebase Auth
+        await updateProfile(auth.currentUser, {
+            displayName: updates.name || user.name,
+            photoURL: updates.avatar || user.avatar
+        });
+
+        // Update Firestore
+        const updatedUser = { ...user, ...updates };
+        await syncUserToFirestore(updatedUser);
+
+        return updatedUser;
     }
 };
 
