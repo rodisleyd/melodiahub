@@ -17,7 +17,6 @@ import { dbService } from './services/dbService';
 import RadioSplash from './components/RadioSplash';
 
 const AppContent: React.FC = () => {
-  console.log("AppContent rendering...");
   const [albums, setAlbums] = useState<Album[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([
     { id: '1', name: 'Minhas Curtidas', tracks: [], coverUrl: 'https://placehold.co/600x600?text=Playlist' }
