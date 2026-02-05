@@ -154,9 +154,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit
 
     setLoading(true);
 
-    try {
-      let finalCoverUrl = coverUrl;
+    let finalCoverUrl = coverUrl;
+    let finalTracks: Track[] = [];
 
+    try {
       // Upload Cover
       if (coverFile) {
         console.log("Fazendo upload da capa...");
@@ -165,7 +166,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit
       }
 
       // Upload Tracks
-      const finalTracks = await Promise.all(tracks.map(async (track) => {
+      finalTracks = await Promise.all(tracks.map(async (track) => {
         const file = track.id ? trackFiles.get(track.id) : undefined;
         if (file) {
           console.log(`Fazendo upload da música: ${track.title}`);
@@ -212,8 +213,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit
         setTermsAccepted(false);
       }
     } catch (error: any) {
+      const errorMsg = error.message || JSON.stringify(error);
       console.error("Erro fatal ao salvar álbum:", error);
-      alert("ERRO: " + (error.message || JSON.stringify(error)));
+
+      let stage = "Salvamento no Banco (Firestore)";
+      if (!finalCoverUrl && coverFile) stage = "Upload da Capa (Storage)";
+      else if (tracks.some((_, i) => !finalTracks[i]?.url && trackFiles.has(tracks[i].id!))) stage = "Upload das Músicas (Storage)";
+
+      alert(`ERRO no ${stage}:\n${errorMsg}`);
     } finally {
       setLoading(false);
     }
