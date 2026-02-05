@@ -6,6 +6,7 @@ export interface Track {
   url: string;
   isFavorite?: boolean;
   playCount?: number;
+  likeCount?: number;
 }
 
 export interface Album {
@@ -18,6 +19,7 @@ export interface Album {
   year: number;
   isFavorite?: boolean;
   playCount?: number;
+  likeCount?: number;
 }
 
 export interface User {

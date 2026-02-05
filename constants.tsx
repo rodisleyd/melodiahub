@@ -76,4 +76,7 @@ export const Icons = {
   Radio: ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className={className}><path d="M20 6H8.3l8.26-3.34L15.88 1 3.24 6.13C2.51 6.42 2 7.15 2 8v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-8 12c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm7.5-9c-.83 0-1.5-.67-1.5-1.5S18.67 6 19.5 6s1.5.67 1.5 1.5S20.33 9 19.5 9z" /></svg>
   ),
+  Heart: ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className={className}><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
+  ),
 };

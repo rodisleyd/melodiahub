@@ -8,7 +8,8 @@ interface AlbumCardProps {
     onToggleExpand: (albumId: string) => void;
     onSelectAlbum: (album: Album, startTrackIndex?: number) => void;
     onToggleFavorite: (albumId: string, e: React.MouseEvent) => void;
-    onTrackAction?: (action: 'play' | 'favorite' | 'addToPlaylist' | 'share', track: Track, album: Album) => void;
+    onLike: (albumId: string, trackId?: string) => void;
+    onTrackAction?: (action: 'play' | 'favorite' | 'addToPlaylist' | 'share' | 'like', track: Track, album: Album) => void;
 }
 
 const AlbumCard: React.FC<AlbumCardProps> = ({
@@ -17,6 +18,7 @@ const AlbumCard: React.FC<AlbumCardProps> = ({
     onToggleExpand,
     onSelectAlbum,
     onToggleFavorite,
+    onLike,
     onTrackAction
 }) => {
     const isExpanded = expandedAlbumId === album.id;
@@ -49,6 +51,24 @@ const AlbumCard: React.FC<AlbumCardProps> = ({
                 >
                     <Icons.Star className="w-5 h-5" />
                 </button>
+
+                {/* Like Button & Counter */}
+                <div className="absolute bottom-4 left-4 flex items-center gap-2 z-10">
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onLike(album.id);
+                        }}
+                        className="p-2 rounded-full bg-black/40 backdrop-blur-md text-white hover:text-[#FF6B35] transition-all duration-300 group/like shadow-lg border border-white/10 hover:border-[#FF6B35]/50"
+                    >
+                        <Icons.Heart className="w-5 h-5 group-hover/like:scale-125 transition-transform" />
+                    </button>
+                    {album.likeCount && album.likeCount > 0 ? (
+                        <span className="text-white text-sm font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                            {album.likeCount}
+                        </span>
+                    ) : null}
+                </div>
 
                 <div className="absolute top-4 right-4 px-3 py-1 bg-black/50 backdrop-blur-md rounded-full text-[10px] font-semibold uppercase tracking-widest">
                     {album.genre}
@@ -111,6 +131,19 @@ const AlbumCard: React.FC<AlbumCardProps> = ({
                                             }}
                                         >
                                             <Icons.Star className="w-3 h-3" />
+                                        </button>
+                                        <button
+                                            title="Curtir Música"
+                                            className="p-1.5 text-[#E0E0E0] hover:text-[#FF6B35] hover:bg-[#333333] rounded-full transition-colors flex items-center gap-1"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onLike(album.id, track.id);
+                                            }}
+                                        >
+                                            <Icons.Heart className="w-3 h-3" />
+                                            {track.likeCount && track.likeCount > 0 && (
+                                                <span className="text-[10px] font-bold">{track.likeCount}</span>
+                                            )}
                                         </button>
                                         <button
                                             title="Compartilhar"

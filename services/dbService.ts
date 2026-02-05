@@ -151,6 +151,38 @@ export const dbService = {
     getAllUsers: async (): Promise<any[]> => {
         const querySnapshot = await getDocs(collection(db, 'users'));
         return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    },
+
+    // Likes
+    toggleLike: async (albumId: string, trackId?: string): Promise<void> => {
+        try {
+            const albumRef = doc(db, ALBUMS_COLLECTION, albumId);
+
+            await runTransaction(db, async (transaction) => {
+                const albumDoc = await transaction.get(albumRef);
+                if (!albumDoc.exists()) throw "Album does not exist!";
+
+                const albumData = albumDoc.data() as Album;
+
+                if (trackId) {
+                    // Update track like count
+                    const newTracks = albumData.tracks.map(t => {
+                        if (t.id === trackId) {
+                            return { ...t, likeCount: (t.likeCount || 0) + 1 };
+                        }
+                        return t;
+                    });
+                    transaction.update(albumRef, { tracks: newTracks });
+                } else {
+                    // Update album like count
+                    transaction.update(albumRef, {
+                        likeCount: (albumData.likeCount || 0) + 1
+                    });
+                }
+            });
+        } catch (e) {
+            console.error("Error toggling like: ", e);
+        }
     }
 };
 

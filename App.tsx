@@ -135,9 +135,12 @@ const AppContent: React.FC = () => {
     const albumToUpdate = albums.find(a => a.id === albumId);
     if (albumToUpdate) {
       const updatedAlbum = { ...albumToUpdate, isFavorite: !albumToUpdate.isFavorite };
-      // We update local state via subscription, but we can also fire and forget unless strict consistency needed
       await dbService.updateAlbum(updatedAlbum);
     }
+  };
+
+  const handleLike = async (albumId: string, trackId?: string) => {
+    await dbService.toggleLike(albumId, trackId);
   };
 
   const handleNext = useCallback(() => {
@@ -315,6 +318,7 @@ const AppContent: React.FC = () => {
       onToggleExpand={(id) => setExpandedAlbumId(expandedAlbumId === id ? null : id)}
       onSelectAlbum={handleSelectAlbum}
       onToggleFavorite={handleToggleFavorite}
+      onLike={handleLike}
       onTrackAction={handleTrackAction}
     />
   );
@@ -732,6 +736,7 @@ const AppContent: React.FC = () => {
         onTrackPlay={(track, album) => {
           dbService.incrementPlayCount(album.id, track.id);
         }}
+        onLike={handleLike}
         isRadioMode={isRadioMode}
         onToggleRadio={() => {
           if (!isRadioMode) {

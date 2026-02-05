@@ -12,6 +12,7 @@ interface PlayerProps {
   onShare: (track: Track, album: Album) => void;
   onToggleShuffle: () => void;
   onTrackPlay?: (track: Track, album: Album) => void;
+  onLike: (albumId: string, trackId?: string) => void;
   isRadioMode: boolean;
   onToggleRadio: () => void;
 }
@@ -25,6 +26,7 @@ const Player: React.FC<PlayerProps> = ({
   onShare,
   onToggleShuffle,
   onTrackPlay,
+  onLike,
   isRadioMode,
   onToggleRadio
 }) => {
@@ -150,6 +152,18 @@ const Player: React.FC<PlayerProps> = ({
               )}
             </div>
             <p className="text-xs text-[#E0E0E0] truncate">{currentAlbum.artist}</p>
+          </div>
+          <div className="flex items-center gap-1 ml-2">
+            <button
+              onClick={() => onLike(currentAlbum.id, currentTrack.id)}
+              className="text-[#E0E0E0] hover:text-[#FF6B35] transition-colors flex items-center gap-1 group/like"
+              title="Curtir Música"
+            >
+              <Icons.Heart className="w-5 h-5 group-hover/like:scale-125 transition-transform" />
+              {currentTrack.likeCount && currentTrack.likeCount > 0 && (
+                <span className="text-[10px] font-bold text-[#E0E0E0]">{currentTrack.likeCount}</span>
+              )}
+            </button>
           </div>
           <button
             onClick={() => currentTrack && currentAlbum && onShare(currentTrack, currentAlbum)}
