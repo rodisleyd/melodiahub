@@ -47,7 +47,7 @@ const AppContent: React.FC = () => {
 
   const [splashData, setSplashData] = useState<{ album: Album, trackIndex: number } | null>(null);
 
-  const { isAuthenticated, isLoading: isAuthLoading, logout } = useAuth();
+  const { user, isAuthenticated, isLoading: isAuthLoading, logout } = useAuth();
 
   // Load Albums and Playlists from Firestore
   useEffect(() => {
@@ -141,7 +141,11 @@ const AppContent: React.FC = () => {
   };
 
   const handleLike = async (albumId: string, trackId?: string) => {
-    await dbService.toggleLike(albumId, trackId);
+    if (!isAuthenticated || !user) {
+      setCurrentView('LOGIN');
+      return;
+    }
+    await dbService.toggleLike(user.id, albumId, trackId);
   };
 
   const handleNext = useCallback(() => {

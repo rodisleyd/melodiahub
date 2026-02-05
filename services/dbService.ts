@@ -154,30 +154,55 @@ export const dbService = {
     },
 
     // Likes
-    toggleLike: async (albumId: string, trackId?: string): Promise<void> => {
+    toggleLike: async (userId: string, albumId: string, trackId?: string): Promise<void> => {
         try {
+            const likeId = trackId ? `${userId}_${albumId}_${trackId}` : `${userId}_${albumId}`;
+            const likeRef = doc(db, 'likes', likeId);
             const albumRef = doc(db, ALBUMS_COLLECTION, albumId);
 
             await runTransaction(db, async (transaction) => {
+                const likeDoc = await transaction.get(likeRef);
                 const albumDoc = await transaction.get(albumRef);
                 if (!albumDoc.exists()) throw "Album does not exist!";
 
                 const albumData = albumDoc.data() as Album;
+                const isLiking = !likeDoc.exists();
 
-                if (trackId) {
-                    // Update track like count
-                    const newTracks = albumData.tracks.map(t => {
-                        if (t.id === trackId) {
-                            return { ...t, likeCount: (t.likeCount || 0) + 1 };
-                        }
-                        return t;
-                    });
-                    transaction.update(albumRef, { tracks: newTracks });
+                if (isLiking) {
+                    // ADD LIKE
+                    transaction.set(likeRef, { userId, albumId, trackId: trackId || null, createdAt: new Date() });
+
+                    if (trackId) {
+                        const newTracks = (albumData.tracks || []).map(t => {
+                            if (t.id === trackId) {
+                                return { ...t, likeCount: (t.likeCount || 0) + 1 };
+                            }
+                            return t;
+                        });
+                        transaction.update(albumRef, { tracks: newTracks });
+                    } else {
+                        transaction.update(albumRef, {
+                            likeCount: (albumData.likeCount || 0) + 1
+                        });
+                    }
                 } else {
-                    // Update album like count
-                    transaction.update(albumRef, {
-                        likeCount: (albumData.likeCount || 0) + 1
-                    });
+                    // REMOVE LIKE
+                    transaction.delete(likeRef);
+
+                    if (trackId) {
+                        const newTracks = (albumData.tracks || []).map(t => {
+                            if (t.id === trackId && (t.likeCount || 0) > 0) {
+                                return { ...t, likeCount: (t.likeCount || 0) - 1 };
+                            }
+                            return t;
+                        });
+                        transaction.update(albumRef, { tracks: newTracks });
+                    } else {
+                        const currentCount = albumData.likeCount || 0;
+                        transaction.update(albumRef, {
+                            likeCount: currentCount > 0 ? currentCount - 1 : 0
+                        });
+                    }
                 }
             });
         } catch (e) {
