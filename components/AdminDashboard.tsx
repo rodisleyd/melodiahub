@@ -160,18 +160,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit
     try {
       // Upload Cover
       if (coverFile) {
-        console.log("Fazendo upload da capa...");
         finalCoverUrl = await dbService.uploadFile(coverFile, 'covers');
-        console.log("Capa enviada:", finalCoverUrl);
       }
 
       // Upload Tracks
       finalTracks = await Promise.all(tracks.map(async (track) => {
         const file = track.id ? trackFiles.get(track.id) : undefined;
         if (file) {
-          console.log(`Fazendo upload da música: ${track.title}`);
           const url = await dbService.uploadFile(file, 'tracks');
-          console.log(`Música enviada: ${track.title}`);
           return {
             ...track,
             url,
@@ -181,7 +177,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit
         return track as Track;
       }));
 
-      console.log("Iniciando salvamento do álbum...");
       const albumData: Album = {
         id: albumToEdit ? albumToEdit.id : Date.now().toString(),
         title,
@@ -193,8 +188,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit
         isFavorite: albumToEdit ? albumToEdit.isFavorite : false,
         playCount: albumToEdit ? albumToEdit.playCount : 0
       };
-
-      console.log("Dados preparados, chamando salvamento...");
 
       if (albumToEdit && onUpdateAlbum) {
         await onUpdateAlbum(albumData);
@@ -213,14 +206,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit
         setTermsAccepted(false);
       }
     } catch (error: any) {
-      const errorMsg = error.message || JSON.stringify(error);
-      console.error("Erro fatal ao salvar álbum:", error);
-
-      let stage = "Salvamento no Banco (Firestore)";
-      if (!finalCoverUrl && coverFile) stage = "Upload da Capa (Storage)";
-      else if (tracks.some((_, i) => !finalTracks[i]?.url && trackFiles.has(tracks[i].id!))) stage = "Upload das Músicas (Storage)";
-
-      alert(`ERRO no ${stage}:\n${errorMsg}`);
+      console.error("Erro ao salvar álbum:", error);
+      alert("Erro ao salvar álbum. Verifique sua conexão ou permissões.");
     } finally {
       setLoading(false);
     }
