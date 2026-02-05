@@ -146,8 +146,15 @@ const AppContent: React.FC = () => {
   };
 
   const handleLike = async (albumId: string, trackId?: string) => {
-    const effectiveUserId = user?.id || localStorage.getItem('melodiahub_guest_id') || 'anonymous';
-    await dbService.toggleLike(effectiveUserId, albumId, trackId);
+    try {
+      const guestId = localStorage.getItem('melodiahub_guest_id');
+      const effectiveUserId = user?.id || guestId || 'anonymous';
+
+      console.log("Tentando curtir com ID:", effectiveUserId);
+      await dbService.toggleLike(effectiveUserId, albumId, trackId);
+    } catch (e) {
+      alert("Erro ao curtir: " + (e instanceof Error ? e.message : String(e)));
+    }
   };
 
   const handleNext = useCallback(() => {
