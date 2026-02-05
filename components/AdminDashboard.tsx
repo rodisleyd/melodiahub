@@ -206,7 +206,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit
       }
     } catch (error: any) {
       console.error("Error saving album:", error);
-      alert("Erro ao salvar álbum: " + (error.message || "Erro desconhecido"));
     } finally {
       setLoading(false);
     }
