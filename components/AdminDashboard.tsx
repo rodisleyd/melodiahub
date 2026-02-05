@@ -204,9 +204,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit
         setTrackFiles(new Map());
         setTermsAccepted(false);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving album:", error);
-      alert("Erro ao salvar álbum. Tente novamente.");
+      alert("Erro ao salvar álbum: " + (error.message || "Erro desconhecido"));
     } finally {
       setLoading(false);
     }
