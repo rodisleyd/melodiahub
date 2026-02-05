@@ -1,6 +1,7 @@
-
+import React, { useState, useEffect, useRef } from 'react';
 import { dbService } from '../services/dbService';
 import { useAuth } from '../context/AuthContext';
+import { Icons } from '../constants';
 
 interface SettingsProps {
     onLogout?: () => void;
