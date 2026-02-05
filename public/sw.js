@@ -1,4 +1,4 @@
-const CACHE_NAME = 'melodiahub-v3';
+const CACHE_NAME = 'melodiahub-v4';
 const urlsToCache = [
     '/',
     '/index.html',
