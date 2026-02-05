@@ -14,6 +14,7 @@ import PlaylistModal from './components/PlaylistModal';
 import Settings from './components/Settings';
 import { Track } from './types';
 import { dbService } from './services/dbService';
+import RadioSplash from './components/RadioSplash';
 
 const AppContent: React.FC = () => {
   const [albums, setAlbums] = useState<Album[]>([]);
@@ -25,6 +26,8 @@ const AppContent: React.FC = () => {
   const [expandedAlbumId, setExpandedAlbumId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDataLoading, setIsDataLoading] = useState(true);
+  const [isRadioMode, setIsRadioMode] = useState(false);
+  const [showRadioSplash, setShowRadioSplash] = useState(true);
 
   // Modal State
   const [modalState, setModalState] = useState<{
@@ -72,12 +75,37 @@ const AppContent: React.FC = () => {
   }, []);
 
   const handleSelectAlbum = (album: Album, startTrackIndex: number = 0) => {
+    setIsRadioMode(false);
     setPlayerState((prev) => ({
       ...prev,
       currentAlbum: album,
       currentTrackIndex: startTrackIndex,
       isPlaying: true,
     }));
+  };
+
+  const playRandomTrack = useCallback(() => {
+    if (albums.length === 0) return;
+
+    // Pick a random album
+    const randomAlbum = albums[Math.floor(Math.random() * albums.length)];
+    if (!randomAlbum.tracks || randomAlbum.tracks.length === 0) return;
+
+    // Pick a random track from that album
+    const randomTrackIndex = Math.floor(Math.random() * randomAlbum.tracks.length);
+
+    setPlayerState((prev) => ({
+      ...prev,
+      currentAlbum: randomAlbum,
+      currentTrackIndex: randomTrackIndex,
+      isPlaying: true,
+    }));
+  }, [albums]);
+
+  const handleStartRadio = () => {
+    setIsRadioMode(true);
+    setShowRadioSplash(false);
+    playRandomTrack();
   };
 
   // Deep Linking Handler
@@ -113,6 +141,11 @@ const AppContent: React.FC = () => {
   };
 
   const handleNext = useCallback(() => {
+    if (isRadioMode) {
+      playRandomTrack();
+      return;
+    }
+
     setPlayerState((prev) => {
       if (!prev.currentAlbum) return prev;
 
@@ -128,7 +161,7 @@ const AppContent: React.FC = () => {
 
       return { ...prev, currentTrackIndex: nextIndex, isPlaying: true };
     });
-  }, []);
+  }, [isRadioMode, playRandomTrack]);
 
   const handlePrev = useCallback(() => {
     setPlayerState((prev) => {
@@ -254,6 +287,7 @@ const AppContent: React.FC = () => {
   };
 
   const handlePlayPlaylist = (playlist: Playlist, startIndex: number = 0) => {
+    setIsRadioMode(false);
     const virtualAlbum: Album = {
       id: playlist.id,
       title: playlist.name,
@@ -698,6 +732,14 @@ const AppContent: React.FC = () => {
         onTrackPlay={(track, album) => {
           dbService.incrementPlayCount(album.id, track.id);
         }}
+        isRadioMode={isRadioMode}
+        onToggleRadio={() => {
+          if (!isRadioMode) {
+            handleStartRadio();
+          } else {
+            setIsRadioMode(false);
+          }
+        }}
       />
 
       <ShareModal
@@ -715,11 +757,18 @@ const AppContent: React.FC = () => {
         onToBeAddedToPlaylist={handleAddToPlaylist}
       />
 
+      {/* SPLASH SCREEN FOR RADIO MELODYHUB */}
+      {showRadioSplash && !splashData && (
+        <RadioSplash onStart={handleStartRadio} />
+      )}
+
       {/* SPLASH SCREEN FOR DEEP LINKING */}
       {splashData && (
         <div
           className="fixed inset-0 z-[100] bg-[#1A1A2E] flex flex-col items-center justify-center p-6 animate-in fade-in duration-500 cursor-pointer"
           onClick={() => {
+            setIsRadioMode(false);
+            setShowRadioSplash(false);
             handleSelectAlbum(splashData.album, splashData.trackIndex);
             setSplashData(null);
           }}

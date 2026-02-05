@@ -12,6 +12,8 @@ interface PlayerProps {
   onShare: (track: Track, album: Album) => void;
   onToggleShuffle: () => void;
   onTrackPlay?: (track: Track, album: Album) => void;
+  isRadioMode: boolean;
+  onToggleRadio: () => void;
 }
 
 const Player: React.FC<PlayerProps> = ({
@@ -22,7 +24,9 @@ const Player: React.FC<PlayerProps> = ({
   onVolumeChange,
   onShare,
   onToggleShuffle,
-  onTrackPlay
+  onTrackPlay,
+  isRadioMode,
+  onToggleRadio
 }) => {
   const { currentAlbum, currentTrackIndex, isPlaying, volume, isShuffle } = playerState;
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -38,6 +42,9 @@ const Player: React.FC<PlayerProps> = ({
     if (!currentAlbum || !currentAlbum.tracks.length) return '';
     if (isShuffle) {
       return "Modo Aleatório";
+    }
+    if (isRadioMode) {
+      return "Radio MelodyHUB";
     }
     const nextIndex = (currentTrackIndex + 1) % currentAlbum.tracks.length;
     return currentAlbum.tracks[nextIndex].title;
@@ -134,7 +141,14 @@ const Player: React.FC<PlayerProps> = ({
             className="w-14 h-14 rounded-lg object-cover shadow-2xl border border-[#333333]"
           />
           <div className="min-w-0">
-            <h4 className="text-sm font-bold text-white truncate">{currentTrack.title}</h4>
+            <div className="flex items-center gap-2">
+              <h4 className="text-sm font-bold text-white truncate">{currentTrack.title}</h4>
+              {isRadioMode && (
+                <span className="px-1.5 py-0.5 bg-[#FF6B35] text-white text-[10px] font-bold rounded uppercase tracking-wider animate-pulse">
+                  Radio
+                </span>
+              )}
+            </div>
             <p className="text-xs text-[#E0E0E0] truncate">{currentAlbum.artist}</p>
           </div>
           <button
@@ -175,11 +189,20 @@ const Player: React.FC<PlayerProps> = ({
             >
               <Icons.Shuffle className="w-5 h-5" />
             </button>
+            <button
+              onClick={onToggleRadio}
+              className={`transition-colors transform hover:scale-110 active:scale-90 ${isRadioMode ? 'text-[#FF6B35]' : 'text-[#E0E0E0] hover:text-white'}`}
+              title="Radio MelodyHUB"
+            >
+              <Icons.Radio className="w-5 h-5" />
+            </button>
           </div>
 
           {/* Próxima Música - Preview */}
           <div className="text-xs text-[#E0E0E0]/60 -mt-1 h-4">
-            {isShuffle ? (
+            {isRadioMode ? (
+              <span className="flex items-center gap-1 text-[#FF6B35] font-semibold"><Icons.Radio className="w-3 h-3" /> Radio MelodyHUB Ativa</span>
+            ) : isShuffle ? (
               <span className="flex items-center gap-1"><Icons.Shuffle className="w-3 h-3" /> Próxima: Aleatória</span>
             ) : (
               <span>Próxima: {getNextTrackTitle()}</span>
