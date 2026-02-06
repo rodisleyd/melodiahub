@@ -157,17 +157,28 @@ const Player: React.FC<PlayerProps> = ({
           <div className="flex items-center gap-1">
             <button
               onClick={() => onLike(currentAlbum.id, currentTrack.id)}
-              className="text-[#E0E0E0] hover:text-[#FF6B35] transition-colors p-1"
+              className="text-[#E0E0E0] hover:text-[#FF6B35] transition-colors p-1 flex items-center gap-1 group/like"
               title="Curtir"
             >
-              <Icons.Heart className="w-4 h-4 md:w-5 md:h-5" />
+              <Icons.Heart className={`w-4 h-4 md:w-5 md:h-5 ${currentTrack.isFavorite ? 'text-[#FF6B35] fill-[#FF6B35]' : ''}`} />
+              {currentTrack.likeCount && currentTrack.likeCount > 0 && (
+                <span className="text-[10px] font-bold text-[#E0E0E0]">{currentTrack.likeCount}</span>
+              )}
             </button>
           </div>
         </div>
 
         {/* Controles Principais */}
         <div className="flex flex-col items-center gap-1 md:gap-2 flex-1 max-w-xl">
-          <div className="flex items-center gap-4 md:gap-8">
+          <div className="flex items-center gap-3 md:gap-8">
+            <button
+              onClick={onToggleShuffle}
+              className={`transition-colors ${isShuffle ? 'text-[#FF6B35]' : 'text-[#E0E0E0]'}`}
+              title="Aleatório"
+            >
+              <Icons.Shuffle className="w-4 h-4 md:w-5 md:h-5" />
+            </button>
+
             <button onClick={onPrev} className="text-[#E0E0E0] hover:text-[#FF6B35] transition-colors">
               <Icons.SkipBack className="w-5 h-5 md:w-6 md:h-6" />
             </button>
@@ -189,15 +200,8 @@ const Player: React.FC<PlayerProps> = ({
             </button>
 
             <button
-              onClick={onToggleShuffle}
-              className={`transition-colors hidden min-[400px]:block ${isShuffle ? 'text-[#FF6B35]' : 'text-[#E0E0E0]'}`}
-              title="Aleatório"
-            >
-              <Icons.Shuffle className="w-4 h-4 md:w-5 md:h-5" />
-            </button>
-            <button
               onClick={onToggleRadio}
-              className={`transition-colors hidden min-[400px]:block ${isRadioMode ? 'text-[#FF6B35]' : 'text-[#E0E0E0]'}`}
+              className={`transition-colors ${isRadioMode ? 'text-[#FF6B35]' : 'text-[#E0E0E0]'}`}
               title="Radio MelodyHUB"
             >
               <Icons.Radio className="w-4 h-4 md:w-5 md:h-5" />
