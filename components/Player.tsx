@@ -135,81 +135,72 @@ const Player: React.FC<PlayerProps> = ({
         onLoadedMetadata={handleTimeUpdate}
       />
 
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-6">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 md:gap-8">
         {/* Informações do Álbum */}
-        <div className="flex items-center gap-4 w-1/4 min-w-0">
+        <div className="flex items-center gap-3 w-1/3 md:w-1/4 min-w-0">
           <img
             src={currentAlbum.coverUrl}
             alt={currentAlbum.title}
-            className="w-14 h-14 rounded-lg object-cover shadow-2xl border border-[#333333]"
+            className="w-10 h-10 md:w-14 md:h-14 rounded-lg object-cover shadow-2xl border border-[#333333] flex-shrink-0"
           />
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h4 className="text-sm font-bold text-white truncate">{currentTrack.title}</h4>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 overflow-hidden">
+              <h4 className="text-[13px] md:text-sm font-bold text-white truncate leading-tight">{currentTrack.title}</h4>
               {isRadioMode && (
-                <span className="px-1.5 py-0.5 bg-[#FF6B35] text-white text-[10px] font-bold rounded uppercase tracking-wider animate-pulse">
+                <span className="flex-shrink-0 px-1 py-0.5 bg-[#FF6B35] text-white text-[8px] font-bold rounded uppercase tracking-wider">
                   Radio
                 </span>
               )}
             </div>
-            <p className="text-xs text-[#E0E0E0] truncate">{currentAlbum.artist}</p>
+            <p className="text-[10px] md:text-xs text-[#E0E0E0] truncate opacity-70">{currentAlbum.artist}</p>
           </div>
-          <div className="flex items-center gap-1 ml-2">
+          <div className="flex items-center gap-1">
             <button
               onClick={() => onLike(currentAlbum.id, currentTrack.id)}
-              className="text-[#E0E0E0] hover:text-[#FF6B35] transition-colors flex items-center gap-1 group/like"
-              title="Curtir Música"
+              className="text-[#E0E0E0] hover:text-[#FF6B35] transition-colors p-1"
+              title="Curtir"
             >
-              <Icons.Heart className="w-5 h-5 group-hover/like:scale-125 transition-transform" />
-              {currentTrack.likeCount && currentTrack.likeCount > 0 && (
-                <span className="text-[10px] font-bold text-[#E0E0E0]">{currentTrack.likeCount}</span>
-              )}
+              <Icons.Heart className="w-4 h-4 md:w-5 md:h-5" />
             </button>
           </div>
-          <button
-            onClick={() => currentTrack && currentAlbum && onShare(currentTrack, currentAlbum)}
-            className="text-[#E0E0E0] hover:text-[#FF6B35] transition-colors ml-2 hidden sm:block"
-          >
-            <Icons.Share className="w-5 h-5" />
-          </button>
         </div>
 
         {/* Controles Principais */}
-        <div className="flex flex-col items-center gap-2 flex-1 max-w-xl">
-          <div className="flex items-center gap-8">
-            <button onClick={onPrev} className="text-[#E0E0E0] hover:text-[#FF6B35] transition-colors transform hover:scale-110 active:scale-90">
-              <Icons.SkipBack className="w-6 h-6" />
+        <div className="flex flex-col items-center gap-1 md:gap-2 flex-1 max-w-xl">
+          <div className="flex items-center gap-4 md:gap-8">
+            <button onClick={onPrev} className="text-[#E0E0E0] hover:text-[#FF6B35] transition-colors">
+              <Icons.SkipBack className="w-5 h-5 md:w-6 md:h-6" />
             </button>
 
-            {/* BOTÃO PLAY/PAUSE SOLICITADO */}
             <button
               onClick={onTogglePlay}
-              className="w-14 h-14 rounded-full bg-[#FF6B35] flex items-center justify-center text-white shadow-[0_0_20px_rgba(255,107,53,0.3)] hover:shadow-[0_0_30px_rgba(255,107,53,0.5)] hover:scale-105 active:scale-95 transition-all duration-300"
+              className="w-10 h-10 md:w-14 md:h-14 rounded-full bg-[#FF6B35] flex items-center justify-center text-white shadow-lg hover:scale-105 active:scale-95 transition-all"
               aria-label={isPlaying ? "Pausar" : "Reproduzir"}
             >
               {isPlaying ? (
-                <Icons.Pause className="w-7 h-7" />
+                <Icons.Pause className="w-5 h-5 md:w-7 md:h-7" />
               ) : (
-                <Icons.Play className="w-7 h-7 ml-1" />
+                <Icons.Play className="w-5 h-5 md:w-7 md:h-7 ml-0.5 md:ml-1" />
               )}
             </button>
 
-            <button onClick={onNext} className="text-[#E0E0E0] hover:text-[#FF6B35] transition-colors transform hover:scale-110 active:scale-90">
-              <Icons.SkipForward className="w-6 h-6" />
+            <button onClick={onNext} className="text-[#E0E0E0] hover:text-[#FF6B35] transition-colors">
+              <Icons.SkipForward className="w-5 h-5 md:w-6 md:h-6" />
             </button>
+
             <button
               onClick={onToggleShuffle}
-              className={`transition-colors transform hover:scale-110 active:scale-90 ${isShuffle ? 'text-[#FF6B35]' : 'text-[#E0E0E0] hover:text-white'}`}
+              className={`transition-colors hidden min-[400px]:block ${isShuffle ? 'text-[#FF6B35]' : 'text-[#E0E0E0]'}`}
               title="Aleatório"
             >
-              <Icons.Shuffle className="w-5 h-5" />
+              <Icons.Shuffle className="w-4 h-4 md:w-5 md:h-5" />
             </button>
             <button
               onClick={onToggleRadio}
-              className={`transition-colors transform hover:scale-110 active:scale-90 ${isRadioMode ? 'text-[#FF6B35]' : 'text-[#E0E0E0] hover:text-white'}`}
+              className={`transition-colors hidden min-[400px]:block ${isRadioMode ? 'text-[#FF6B35]' : 'text-[#E0E0E0]'}`}
               title="Radio MelodyHUB"
             >
-              <Icons.Radio className="w-5 h-5" />
+              <Icons.Radio className="w-4 h-4 md:w-5 md:h-5" />
             </button>
           </div>
 

@@ -368,7 +368,7 @@ const AppContent: React.FC = () => {
                   placeholder="Pesquisar álbuns, artistas ou gêneros..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="block w-full pl-12 pr-12 py-4 bg-[#333333]/20 border border-[#333333] rounded-2xl text-white placeholder-[#E0E0E0]/50 focus:outline-none focus:border-[#FF6B35] focus:ring-1 focus:ring-[#FF6B35] transition-all shadow-lg"
+                  className="block w-full pl-12 pr-12 py-3.5 bg-[#333333]/20 border border-[#333333] rounded-2xl text-white placeholder-[#E0E0E0]/50 focus:outline-none focus:border-[#FF6B35] focus:ring-1 focus:ring-[#FF6B35] transition-all shadow-lg text-sm sm:text-base"
                 />
                 {searchQuery && (
                   <button
@@ -381,55 +381,56 @@ const AppContent: React.FC = () => {
               </div>
             </div>
 
-            <section className="mb-12">
-              <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
-                <Icons.TrendingUp className="w-8 h-8 text-[#FF6B35]" />
-                Em Alta
-              </h2>
+            {!searchQuery && (
+              <section className="mb-12">
+                <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
+                  <Icons.TrendingUp className="w-8 h-8 text-[#FF6B35]" />
+                  Em Alta
+                </h2>
 
-              <div className="bg-[#333333]/20 rounded-3xl p-6 border border-[#333333]">
-                {/* Top Tracks Logic */}
-                {(() => {
-                  const allTracks = albums.flatMap(a => (a.tracks || []).map(t => ({ ...t, album: a })));
-                  const topTracks = allTracks.sort((a, b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 5);
+                <div className="bg-[#333333]/20 rounded-3xl p-4 sm:p-6 border border-[#333333]">
+                  {/* Top Tracks Logic */}
+                  {(() => {
+                    const allTracks = albums.flatMap(a => (a.tracks || []).map(t => ({ ...t, album: a })));
+                    const topTracks = allTracks.sort((a, b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 5);
 
-                  if (topTracks.length === 0 || !topTracks[0].playCount) {
-                    return <p className="text-[#E0E0E0]/50 italic">As estatísticas aparecerão conforme as músicas forem tocadas.</p>;
-                  }
+                    if (topTracks.length === 0 || !topTracks[0].playCount) {
+                      return <p className="text-[#E0E0E0]/50 italic text-sm">As estatísticas aparecerão conforme as músicas forem tocadas.</p>;
+                    }
 
-                  return (
+                    return (
+                      <div className="flex overflow-x-auto pb-4 gap-4 scrollbar-hide -mx-2 px-2 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 md:overflow-visible">
+                        {topTracks.map((track, idx) => (
+                          <div
+                            key={`${track.album.id}-${track.id}`}
+                            className="flex-shrink-0 w-64 md:w-auto bg-[#1A1A2E] p-2.5 rounded-xl hover:bg-[#333333] transition-all group flex items-center gap-3 border border-[#333333]/50 hover:border-[#FF6B35]/50 cursor-pointer"
+                            onClick={() => {
+                              const trackIndex = (track.album.tracks || []).findIndex(t => t.id === track.id);
+                              handleSelectAlbum(track.album, trackIndex !== -1 ? trackIndex : 0);
+                            }}
+                          >
+                            <div className="relative w-14 h-14 flex-shrink-0">
+                              <img src={track.album.coverUrl} className="w-full h-full object-cover rounded-md" />
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-md text-white">
+                                <Icons.Play className="w-5 h-5" />
+                              </div>
+                            </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
-                      {topTracks.map((track, idx) => (
-                        <div
-                          key={`${track.album.id}-${track.id}`}
-                          className="bg-[#1A1A2E] p-2 rounded-xl hover:bg-[#333333] transition-all group flex items-center gap-3 border border-[#333333]/50 hover:border-[#FF6B35]/50 cursor-pointer"
-                          onClick={() => {
-                            const trackIndex = (track.album.tracks || []).findIndex(t => t.id === track.id);
-                            handleSelectAlbum(track.album, trackIndex !== -1 ? trackIndex : 0);
-                          }}
-                        >
-                          <div className="relative w-12 h-12 flex-shrink-0">
-                            <img src={track.album.coverUrl} className="w-full h-full object-cover rounded-md" />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-md text-white">
-                              <Icons.Play className="w-5 h-5" />
+                            <div className="flex-1 min-w-0 overflow-hidden">
+                              <div className="flex items-center gap-2 mb-0.5">
+                                <span className="text-xs font-bold text-[#FF6B35]">#{idx + 1}</span>
+                                <h3 className="font-bold text-white text-sm truncate" title={track.title}>{track.title}</h3>
+                              </div>
+                              <p className="text-xs text-[#E0E0E0] truncate">{track.album.artist}</p>
                             </div>
                           </div>
-
-                          <div className="flex-1 min-w-0 overflow-hidden">
-                            <div className="flex items-center gap-2 mb-0.5">
-                              <span className="text-xs font-bold text-[#FF6B35]">#{idx + 1}</span>
-                              <h3 className="font-bold text-white text-sm truncate" title={track.title}>{track.title}</h3>
-                            </div>
-                            <p className="text-xs text-[#E0E0E0] truncate">{track.album.artist}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  );
-                })()}
-              </div>
-            </section>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </div>
+              </section>
+            )}
 
             <section>
               <div className="flex items-center justify-between mb-8">
