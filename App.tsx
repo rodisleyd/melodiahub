@@ -15,6 +15,7 @@ import Settings from './components/Settings';
 import { Track } from './types';
 import { dbService } from './services/dbService';
 import RadioSplash from './components/RadioSplash';
+import EditPlaylistModal from './components/EditPlaylistModal';
 
 const AppContent: React.FC = () => {
   const [albums, setAlbums] = useState<Album[]>([]);
@@ -28,6 +29,7 @@ const AppContent: React.FC = () => {
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [isRadioMode, setIsRadioMode] = useState(false);
   const [showRadioSplash, setShowRadioSplash] = useState(true);
+  const [editingPlaylist, setEditingPlaylist] = useState<Playlist | null>(null);
 
   // Modal State
   const [modalState, setModalState] = useState<{
@@ -335,6 +337,16 @@ const AppContent: React.FC = () => {
     await dbService.updatePlaylist(updatedPlaylist);
   };
 
+  const handleUpdatePlaylist = async (updatedPlaylist: Playlist) => {
+    await dbService.updatePlaylist(updatedPlaylist);
+    setPlaylists(prev => prev.map(p => p.id === updatedPlaylist.id ? updatedPlaylist : p));
+  };
+
+  const handleDeletePlaylist = async (playlistId: string) => {
+    await dbService.deletePlaylist(playlistId);
+    setPlaylists(prev => prev.filter(p => p.id !== playlistId));
+  };
+
   const handlePlayPlaylist = (playlist: Playlist, startIndex: number = 0) => {
     setIsRadioMode(false);
     const virtualAlbum: Album = {
@@ -403,6 +415,30 @@ const AppContent: React.FC = () => {
             <p className="text-xs text-[#FF6B35] mt-1 font-medium">Por: {playlist.ownerName}</p>
           )}
         </div>
+        {!showOwner && playlist.id !== '1' && (
+          <div className="flex items-center gap-2 ml-auto">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setEditingPlaylist(playlist);
+              }}
+              className="p-2 text-[#E0E0E0] hover:text-[#FF6B35] hover:bg-[#333333] rounded-full transition-all"
+              title="Editar Playlist"
+            >
+              <Icons.Pencil className="w-4 h-4" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setEditingPlaylist({ ...playlist, id: playlist.id }); // Using it to trigger delete flow in modal
+              }}
+              className="p-2 text-[#E0E0E0] hover:text-red-500 hover:bg-[#333333] rounded-full transition-all"
+              title="Excluir Playlist"
+            >
+              <Icons.Trash className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -978,6 +1014,14 @@ const AppContent: React.FC = () => {
           </button>
         </div>
       )}
+
+      <EditPlaylistModal
+        isOpen={!!editingPlaylist}
+        onClose={() => setEditingPlaylist(null)}
+        playlist={editingPlaylist}
+        onUpdate={handleUpdatePlaylist}
+        onDelete={handleDeletePlaylist}
+      />
 
       {/* SPLASH SCREEN FOR RADIO MELODYHUB */}
       {showRadioSplash && !splashData && (
