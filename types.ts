@@ -7,6 +7,7 @@ export interface Track {
   isFavorite?: boolean;
   playCount?: number;
   likeCount?: number;
+  videoUrl?: string;
 }
 
 export interface Album {
@@ -35,9 +36,12 @@ export interface Playlist {
   name: string;
   tracks: Track[];
   coverUrl?: string;
+  isPublic?: boolean;
+  ownerId?: string;
+  ownerName?: string;
 }
 
-export type ViewType = 'EXPLORE' | 'MY_ALBUMS' | 'FAVORITES' | 'PLAYLISTS' | 'SETTINGS' | 'ADMIN_CREATE' | 'LOGIN' | 'REGISTER' | 'EDIT_ALBUM';
+export type ViewType = 'EXPLORE' | 'MY_ALBUMS' | 'FAVORITES' | 'PLAYLISTS' | 'SETTINGS' | 'ADMIN_CREATE' | 'LOGIN' | 'REGISTER' | 'EDIT_ALBUM' | 'COMMUNITY_PLAYLISTS';
 
 export interface PlayerState {
   currentAlbum: Album | null;

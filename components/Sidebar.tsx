@@ -18,6 +18,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, isOpen, on
     { id: 'EXPLORE', label: 'Explorar', icon: Icons.Home },
     { id: 'MY_ALBUMS', label: 'Meus Álbuns', icon: Icons.Music },
     { id: 'FAVORITES', label: 'Favoritos', icon: Icons.Star },
+    { id: 'COMMUNITY_PLAYLISTS', label: 'Comunidade', icon: Icons.TrendingUp },
     { id: 'PLAYLISTS', label: 'Minhas Playlists', icon: Icons.List },
     ...(user ? [{
       id: 'ADMIN_CREATE',

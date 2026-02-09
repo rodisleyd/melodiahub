@@ -165,6 +165,15 @@ const Player: React.FC<PlayerProps> = ({
                 <span className="text-[10px] font-bold text-[#E0E0E0]">{currentTrack.likeCount}</span>
               )}
             </button>
+            {currentTrack.videoUrl && (
+              <button
+                onClick={() => window.open(currentTrack.videoUrl, '_blank')}
+                className="text-[#FF6B35] animate-pulse p-1"
+                title="Assistir Clipe"
+              >
+                <Icons.Video className="w-4 h-4 md:w-5 md:h-5" />
+              </button>
+            )}
           </div>
         </div>
 

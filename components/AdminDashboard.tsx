@@ -412,8 +412,23 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit
                           newTracks[idx].title = e.target.value;
                           setTracks(newTracks);
                         }}
-                        className="bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-[#FF6B35] px-2 py-1 rounded"
+                        className="bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-[#FF6B35] px-2 py-1 rounded font-semibold text-white w-48"
+                        placeholder="Nome da faixa"
                       />
+                      <div className="flex items-center gap-2 bg-[#1A1A2E] border border-[#333333] rounded-lg px-2 py-1 ml-4 group-focus-within:border-[#FF6B35]/50">
+                        <Icons.Video className="w-4 h-4 text-[#E0E0E0]/50" />
+                        <input
+                          type="text"
+                          value={track.videoUrl || ''}
+                          onChange={(e) => {
+                            const newTracks = [...tracks];
+                            newTracks[idx].videoUrl = e.target.value;
+                            setTracks(newTracks);
+                          }}
+                          className="bg-transparent border-none focus:outline-none text-xs text-[#E0E0E0] w-40"
+                          placeholder="URL do Vídeo (YouTube/MP4)"
+                        />
+                      </div>
                     </div>
                     <button
                       type="button"

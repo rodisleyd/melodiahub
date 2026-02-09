@@ -46,6 +46,11 @@ const AppContent: React.FC = () => {
   });
 
   const [splashData, setSplashData] = useState<{ album: Album, trackIndex: number } | null>(null);
+  const [radioPlaysCount, setRadioPlaysCount] = useState(0);
+  const [showCommercial, setShowCommercial] = useState(false);
+
+  const COMMERCIAL_URL = "https://firebasestorage.googleapis.com/v0/b/melodiahub-80963.appspot.com/o/ads%2Fcommercial.mp4?alt=media"; // Placeholder or real URL
+  const PLAYS_BEFORE_AD = 5;
 
   const { user, isAuthenticated, isLoading: isAuthLoading, logout } = useAuth();
 
@@ -158,6 +163,13 @@ const AppContent: React.FC = () => {
 
   const handleNext = useCallback(() => {
     if (isRadioMode) {
+      if (radioPlaysCount + 1 >= PLAYS_BEFORE_AD) {
+        setRadioPlaysCount(0);
+        setShowCommercial(true);
+        setPlayerState(prev => ({ ...prev, isPlaying: false }));
+        return;
+      }
+      setRadioPlaysCount(prev => prev + 1);
       playRandomTrack();
       return;
     }
@@ -177,7 +189,7 @@ const AppContent: React.FC = () => {
 
       return { ...prev, currentTrackIndex: nextIndex, isPlaying: true };
     });
-  }, [isRadioMode, playRandomTrack]);
+  }, [isRadioMode, playRandomTrack, radioPlaysCount, PLAYS_BEFORE_AD]);
 
   const handlePrev = useCallback(() => {
     setPlayerState((prev) => {
@@ -234,13 +246,24 @@ const AppContent: React.FC = () => {
     return albums.filter(album =>
       album.title.toLowerCase().includes(query) ||
       album.artist.toLowerCase().includes(query) ||
-      album.genre.toLowerCase().includes(query)
+      album.genre.toLowerCase().includes(query) ||
+      (album.tracks && album.tracks.some(track => track.title.toLowerCase().includes(query)))
     );
   }, [albums, searchQuery]);
 
   const favoriteAlbums = useMemo(() => {
     return albums.filter(album => album.isFavorite);
   }, [albums]);
+
+  const myPlaylists = useMemo(() => {
+    const userId = user?.id || localStorage.getItem('melodiahub_guest_id');
+    return playlists.filter(p => p.ownerId === userId);
+  }, [playlists, user]);
+
+  const communityPlaylists = useMemo(() => {
+    const userId = user?.id || localStorage.getItem('melodiahub_guest_id');
+    return playlists.filter(p => p.isPublic && p.ownerId !== userId);
+  }, [playlists, user]);
 
   const handleTrackAction = async (action: 'play' | 'favorite' | 'addToPlaylist' | 'share', track: Track, album: Album) => {
     switch (action) {
@@ -262,23 +285,19 @@ const AppContent: React.FC = () => {
     }
   };
 
-  const handleCreatePlaylist = async (name: string) => {
-    const newPlaylist: any = {
+  const handleCreatePlaylist = async (name: string, isPublic: boolean = false) => {
+    const newPlaylist: Omit<Playlist, 'id'> = {
       name,
       tracks: [],
       coverUrl: 'https://placehold.co/600x600?text=Playlist',
+      isPublic,
+      ownerId: user?.id || localStorage.getItem('melodiahub_guest_id') || 'anonymous',
+      ownerName: user?.name || 'Visitante'
     };
+
     const newId = await dbService.addPlaylist(newPlaylist);
 
     if (modalState.track) {
-      // Need to pass the full playlist object/ID to add to playlist
-      // But handleAddToPlaylist expects existing playlist.
-      // We will just call it with the new ID.
-      // Wait, handleAddToPlaylist logic relies on 'playlists' state which might not be updated yet via subscription?
-      // Actually, subscription is fast but maybe not instant instant.
-      // Safe bet: manually construct the playlist for the second call or handle it.
-      // Best approach: Add playlist, THEN add track.
-
       // Since addPlaylist returns ID, we can do:
       const playlistWithId = { ...newPlaylist, id: newId };
       handleAddToPlaylist(newId, modalState.track, playlistWithId);
@@ -322,6 +341,53 @@ const AppContent: React.FC = () => {
       isPlaying: true,
     }));
   };
+
+  const renderPlaylistCard = (playlist: Playlist, showOwner: boolean = false) => (
+    <div key={playlist.id} className="bg-[#333333]/20 p-6 rounded-3xl border border-[#333333] hover:bg-[#333333]/40 transition-colors group">
+      <div className="flex items-center gap-6 mb-6">
+        <div
+          className="w-24 h-24 rounded-2xl overflow-hidden shadow-xl cursor-pointer hover:scale-105 transition-transform group/cover relative"
+          onClick={() => handlePlayPlaylist(playlist, 0)}
+        >
+          <img src={playlist.coverUrl} alt={playlist.name} className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/cover:opacity-100 flex items-center justify-center transition-all duration-300">
+            <Icons.Play className="w-8 h-8 text-white" />
+          </div>
+        </div>
+        <div>
+          <h3 className="text-xl font-semibold">{playlist.name}</h3>
+          <p className="text-[#E0E0E0] text-sm">{playlist.tracks.length} músicas</p>
+          {showOwner && playlist.ownerName && (
+            <p className="text-xs text-[#FF6B35] mt-1 font-medium">Por: {playlist.ownerName}</p>
+          )}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        {playlist.tracks.length === 0 ? (
+          <p className="text-[#E0E0E0]/50 text-sm italic">Playlist vazia.</p>
+        ) : (
+          playlist.tracks.slice(0, 5).map((track, idx) => (
+            <div key={`${playlist.id}-${track.id}-${idx}`} className="flex items-center justify-between p-2 rounded-lg hover:bg-[#333333]/60 transition-colors">
+              <div className="flex items-center gap-3 overflow-hidden">
+                <span className="text-xs font-mono text-[#E0E0E0]/50 w-4">{(idx + 1).toString().padStart(2, '0')}</span>
+                <span className="text-sm font-medium text-white truncate">{track.title}</span>
+              </div>
+              <button
+                onClick={() => handlePlayPlaylist(playlist, idx)}
+                className="p-1.5 hover:text-[#FF6B35] transition-colors"
+              >
+                <Icons.Play className="w-4 h-4" />
+              </button>
+            </div>
+          ))
+        )}
+        {playlist.tracks.length > 5 && (
+          <p className="text-xs text-[#E0E0E0]/30 text-center pt-2 italic">e mais {playlist.tracks.length - 5} músicas...</p>
+        )}
+      </div>
+    </div>
+  );
 
   const renderAlbumCard = (album: Album) => (
     <AlbumCard
@@ -549,49 +615,39 @@ const AppContent: React.FC = () => {
           <div className="animate-in fade-in slide-in-from-right-4 duration-700">
             <header className="mb-12">
               <h1 className="text-5xl font-semibold tracking-tight mb-4">Minhas Playlists</h1>
+              <p className="text-[#E0E0E0]">Suas seleções pessoais de faixas.</p>
             </header>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {playlists.map(playlist => (
-                <div key={playlist.id} className="bg-[#333333]/20 p-6 rounded-3xl border border-[#333333] hover:bg-[#333333]/40 transition-colors group">
-                  <div className="flex items-center gap-6 mb-6">
-                    <div
-                      className="w-24 h-24 rounded-2xl overflow-hidden shadow-xl cursor-pointer hover:scale-105 transition-transform group/cover relative"
-                      onClick={() => handlePlayPlaylist(playlist, 0)}
-                    >
-                      <img src={playlist.coverUrl} alt={playlist.name} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/cover:opacity-100 flex items-center justify-center transition-all duration-300">
-                        <Icons.Play className="w-8 h-8 text-white" />
-                      </div>
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-semibold">{playlist.name}</h3>
-                      <p className="text-[#E0E0E0] text-sm">{playlist.tracks.length} músicas</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    {playlist.tracks.length === 0 ? (
-                      <p className="text-[#E0E0E0]/50 text-sm italic">Playlist vazia.</p>
-                    ) : (
-                      playlist.tracks.map((track, idx) => (
-                        <div key={`${playlist.id}-${track.id}-${idx}`} className="flex items-center justify-between p-2 rounded-lg hover:bg-[#333333]/60 transition-colors">
-                          <div className="flex items-center gap-3 overflow-hidden">
-                            <span className="text-xs font-mono text-[#E0E0E0]/50 w-4">{(idx + 1).toString().padStart(2, '0')}</span>
-                            <span className="text-sm font-medium text-white truncate">{track.title}</span>
-                          </div>
-                          <button
-                            onClick={() => handlePlayPlaylist(playlist, idx)}
-                            className="p-1.5 hover:text-[#FF6B35] transition-colors"
-                          >
-                            <Icons.Play className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+            {myPlaylists.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {myPlaylists.map(playlist => renderPlaylistCard(playlist))}
+              </div>
+            ) : (
+              <div className="text-center py-20 bg-[#333333]/10 rounded-[3rem] border border-dashed border-[#333333]">
+                <Icons.List className="w-16 h-16 text-[#333333] mx-auto mb-4" />
+                <h3 className="text-xl font-semibold">Nenhuma playlist criada</h3>
+                <p className="mt-2 text-[#E0E0E0]/60">Crie sua primeira playlist para começar!</p>
+              </div>
+            )}
+          </div>
+        );
+      case 'COMMUNITY_PLAYLISTS':
+        return (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <header className="mb-12">
+              <h1 className="text-5xl font-semibold tracking-tight mb-4">Comunidade</h1>
+              <p className="text-[#E0E0E0]">Explore playlists compartilhadas por outros ouvintes.</p>
+            </header>
+            {communityPlaylists.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {communityPlaylists.map(playlist => renderPlaylistCard(playlist, true))}
+              </div>
+            ) : (
+              <div className="text-center py-20 bg-[#333333]/10 rounded-[3rem] border border-dashed border-[#333333]">
+                <Icons.TrendingUp className="w-16 h-16 text-[#333333] mx-auto mb-4" />
+                <h3 className="text-xl font-semibold">Nada por aqui ainda</h3>
+                <p className="mt-2 text-[#E0E0E0]/60">Seja o primeiro a compartilhar uma playlist pública!</p>
+              </div>
+            )}
           </div>
         );
       case 'MY_ALBUMS':
@@ -775,10 +831,38 @@ const AppContent: React.FC = () => {
       <PlaylistModal
         isOpen={modalState.type === 'PLAYLIST'}
         onClose={() => setModalState({ ...modalState, type: null })}
-        playlists={playlists}
+        playlists={myPlaylists}
         onCreatePlaylist={handleCreatePlaylist}
         onToBeAddedToPlaylist={handleAddToPlaylist}
       />
+
+      {showCommercial && (
+        <div className="fixed inset-0 z-[110] bg-black flex flex-col items-center justify-center p-4">
+          <div className="max-w-4xl w-full aspect-video bg-[#1A1A2E] rounded-3xl overflow-hidden shadow-2xl relative border border-[#333333]">
+            <video
+              src={COMMERCIAL_URL}
+              autoPlay
+              onEnded={() => {
+                setShowCommercial(false);
+                playRandomTrack();
+              }}
+              className="w-full h-full object-contain"
+            />
+            <div className="absolute top-6 right-6 bg-black/60 px-4 py-2 rounded-full backdrop-blur-md border border-white/10">
+              <span className="text-white text-xs font-bold tracking-widest uppercase">Anúncio • MelodiaHub</span>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              setShowCommercial(false);
+              playRandomTrack();
+            }}
+            className="mt-8 text-white/30 hover:text-white text-sm underline transition-colors"
+          >
+            Pular (Desenvolvimento)
+          </button>
+        </div>
+      )}
 
       {/* SPLASH SCREEN FOR RADIO MELODYHUB */}
       {showRadioSplash && !splashData && (

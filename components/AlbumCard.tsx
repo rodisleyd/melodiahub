@@ -155,6 +155,18 @@ const AlbumCard: React.FC<AlbumCardProps> = ({
                                         >
                                             <Icons.Share className="w-3 h-3" />
                                         </button>
+                                        {track.videoUrl && (
+                                            <button
+                                                title="Assistir Clipe"
+                                                className="p-1.5 text-[#FF6B35] hover:bg-[#333333] rounded-full transition-colors animate-pulse"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    window.open(track.videoUrl, '_blank');
+                                                }}
+                                            >
+                                                <Icons.Video className="w-3 h-3" />
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             ))

@@ -7,19 +7,21 @@ interface PlaylistModalProps {
     isOpen: boolean;
     onClose: () => void;
     playlists: Playlist[];
-    onCreatePlaylist: (name: string) => void;
+    onCreatePlaylist: (name: string, isPublic: boolean) => void;
     onToBeAddedToPlaylist: (playlistId: string) => void;
 }
 
 const PlaylistModal: React.FC<PlaylistModalProps> = ({ isOpen, onClose, playlists, onCreatePlaylist, onToBeAddedToPlaylist }) => {
     const [newPlaylistName, setNewPlaylistName] = useState('');
     const [isCreating, setIsCreating] = useState(false);
+    const [isPublic, setIsPublic] = useState(false);
 
     const handleCreate = (e: React.FormEvent) => {
         e.preventDefault();
         if (newPlaylistName.trim()) {
-            onCreatePlaylist(newPlaylistName.trim());
+            onCreatePlaylist(newPlaylistName.trim(), isPublic);
             setNewPlaylistName('');
+            setIsPublic(false);
             setIsCreating(false);
         }
     };
@@ -48,6 +50,17 @@ const PlaylistModal: React.FC<PlaylistModalProps> = ({ isOpen, onClose, playlist
                             className="w-full bg-[#1A1A2E] border border-[#333333] rounded-xl px-4 py-3 text-white mb-3 focus:outline-none focus:border-[#FF6B35]"
                             autoFocus
                         />
+                        <div className="flex items-center gap-3 mb-4 px-1">
+                            <label className="flex items-center gap-2 cursor-pointer group">
+                                <input
+                                    type="checkbox"
+                                    checked={isPublic}
+                                    onChange={(e) => setIsPublic(e.target.checked)}
+                                    className="w-4 h-4 rounded border-[#333333] bg-[#1A1A2E] text-[#FF6B35] focus:ring-[#FF6B35]"
+                                />
+                                <span className="text-sm text-[#E0E0E0] group-hover:text-white transition-colors">Tornar esta playlist pública</span>
+                            </label>
+                        </div>
                         <div className="flex gap-2 justify-end">
                             <button
                                 type="button"
