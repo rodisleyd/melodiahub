@@ -39,6 +39,7 @@ export interface Playlist {
   isPublic?: boolean;
   ownerId?: string;
   ownerName?: string;
+  createdAt?: number;
 }
 
 export type ViewType = 'EXPLORE' | 'MY_ALBUMS' | 'FAVORITES' | 'PLAYLISTS' | 'SETTINGS' | 'ADMIN_CREATE' | 'LOGIN' | 'REGISTER' | 'EDIT_ALBUM' | 'COMMUNITY_PLAYLISTS';

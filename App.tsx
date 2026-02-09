@@ -273,7 +273,9 @@ const AppContent: React.FC = () => {
 
   const communityPlaylists = useMemo(() => {
     const userId = user?.id || localStorage.getItem('melodiahub_guest_id');
-    return playlists.filter(p => p.isPublic && p.ownerId !== userId);
+    return playlists
+      .filter(p => p.isPublic && p.ownerId !== userId)
+      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   }, [playlists, user]);
 
   const handleTrackAction = async (action: 'play' | 'favorite' | 'addToPlaylist' | 'share', track: Track, album: Album) => {
@@ -303,7 +305,8 @@ const AppContent: React.FC = () => {
       coverUrl: 'https://placehold.co/600x600?text=Playlist',
       isPublic,
       ownerId: user?.id || localStorage.getItem('melodiahub_guest_id') || 'anonymous',
-      ownerName: user?.name || 'Visitante'
+      ownerName: user?.name || 'Visitante',
+      createdAt: Date.now()
     };
 
     const newId = await dbService.addPlaylist(newPlaylist);
@@ -352,6 +355,34 @@ const AppContent: React.FC = () => {
       isPlaying: true,
     }));
   };
+
+  const renderMiniPlaylistCard = (playlist: Playlist) => (
+    <div
+      key={playlist.id}
+      className="bg-[#333333]/20 p-3 rounded-2xl border border-[#333333] hover:bg-[#333333]/40 transition-all group flex items-center gap-3 w-full sm:w-64 flex-shrink-0"
+    >
+      <div
+        className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 relative cursor-pointer"
+        onClick={() => handlePlayPlaylist(playlist, 0)}
+      >
+        <img src={playlist.coverUrl} className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+          <Icons.Play className="w-4 h-4 text-white" />
+        </div>
+      </div>
+      <div className="min-w-0 flex-1">
+        <h4 className="text-sm font-bold text-white truncate">{playlist.name}</h4>
+        <p className="text-[10px] text-[#FF6B35] truncate font-medium">{playlist.ownerName || 'Visitante'}</p>
+      </div>
+      <button
+        onClick={() => handlePlayPlaylist(playlist, 0)}
+        className="p-2 bg-[#FF6B35]/10 text-[#FF6B35] hover:bg-[#FF6B35] hover:text-white rounded-full transition-all"
+        title="Tocar Playlist"
+      >
+        <Icons.Play className="w-3.5 h-3.5 ml-0.5" />
+      </button>
+    </div>
+  );
 
   const renderPlaylistCard = (playlist: Playlist, showOwner: boolean = false) => (
     <div key={playlist.id} className="bg-[#333333]/20 p-6 rounded-3xl border border-[#333333] hover:bg-[#333333]/40 transition-colors group">
@@ -426,11 +457,30 @@ const AppContent: React.FC = () => {
       case 'EXPLORE':
         return (
           <div className="">
-            <header className="mb-10">
-              <h1 className="text-5xl font-semibold tracking-tight mb-4">Descubra novos sons</h1>
-              <p className="text-[#E0E0E0] text-lg max-w-2xl">
-                O seu santuário digital para curadoria de áudio. Explore álbuns selecionados por artistas independentes.
-              </p>
+            <header className="mb-12 flex flex-col xl:flex-row xl:items-end justify-between gap-8">
+              <div className="flex-1">
+                <h1 className="text-5xl font-semibold tracking-tight mb-4">Descubra novos sons</h1>
+                <p className="text-[#E0E0E0] text-lg max-w-2xl">
+                  O seu santuário digital para curadoria de áudio. Explore álbuns selecionados por artistas independentes.
+                </p>
+              </div>
+
+              {!searchQuery && communityPlaylists.length > 0 && (
+                <div className="flex-shrink-0 w-full xl:w-auto">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-[#FF6B35]">Playlists de Ouvintes</h3>
+                    <button
+                      onClick={() => setCurrentView('COMMUNITY_PLAYLISTS')}
+                      className="text-[10px] font-bold uppercase tracking-widest text-[#E0E0E0] hover:text-[#FF6B35] transition-colors border border-[#333333] px-3 py-1 rounded-full"
+                    >
+                      Veja +
+                    </button>
+                  </div>
+                  <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                    {communityPlaylists.slice(0, 3).map(playlist => renderMiniPlaylistCard(playlist))}
+                  </div>
+                </div>
+              )}
             </header>
 
             <div className="mb-12 max-w-xl">
