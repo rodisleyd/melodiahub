@@ -408,34 +408,34 @@ const AppContent: React.FC = () => {
             <Icons.Play className="w-8 h-8 text-white" />
           </div>
         </div>
-        <div>
-          <h3 className="text-xl font-semibold">{playlist.name}</h3>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-xl font-semibold truncate">{playlist.name}</h3>
           <p className="text-[#E0E0E0] text-sm">{playlist.tracks.length} músicas</p>
           {showOwner && playlist.ownerName && (
-            <p className="text-xs text-[#FF6B35] mt-1 font-medium">Por: {playlist.ownerName}</p>
+            <p className="text-xs text-[#FF6B35] mt-1 font-medium truncate">Por: {playlist.ownerName}</p>
           )}
         </div>
         {!showOwner && playlist.id !== '1' && (
-          <div className="flex items-center gap-2 ml-auto">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setEditingPlaylist(playlist);
               }}
-              className="p-2 text-[#E0E0E0] hover:text-[#FF6B35] hover:bg-[#333333] rounded-full transition-all"
+              className="w-10 h-10 flex items-center justify-center bg-[#333333]/40 text-[#E0E0E0] hover:text-[#FF6B35] hover:bg-[#333333] rounded-xl transition-all border border-white/5"
               title="Editar Playlist"
             >
-              <Icons.Pencil className="w-4 h-4" />
+              <Icons.Pencil className="w-5 h-5" />
             </button>
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                setEditingPlaylist({ ...playlist, id: playlist.id }); // Using it to trigger delete flow in modal
+                setEditingPlaylist({ ...playlist }); // Trigger modal, which handles delete flow
               }}
-              className="p-2 text-[#E0E0E0] hover:text-red-500 hover:bg-[#333333] rounded-full transition-all"
+              className="w-10 h-10 flex items-center justify-center bg-red-500/10 text-red-500/60 hover:text-red-500 hover:bg-red-500/20 rounded-xl transition-all border border-red-500/10"
               title="Excluir Playlist"
             >
-              <Icons.Trash className="w-4 h-4" />
+              <Icons.Trash className="w-5 h-5" />
             </button>
           </div>
         )}
