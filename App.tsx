@@ -237,6 +237,17 @@ const AppContent: React.FC = () => {
     setCurrentView(view);
   };
 
+  const filteredTracks = useMemo(() => {
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) return [];
+
+    return albums.flatMap(album =>
+      (album.tracks || [])
+        .filter(track => track.title.toLowerCase().includes(query))
+        .map(track => ({ ...track, album }))
+    );
+  }, [albums, searchQuery]);
+
   const filteredAlbums = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
     if (!query) {
@@ -498,10 +509,64 @@ const AppContent: React.FC = () => {
               </section>
             )}
 
+            {searchQuery && (
+              <>
+                {filteredTracks.length > 0 && (
+                  <section className="mb-12">
+                    <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
+                      <Icons.Music className="w-8 h-8 text-[#FF6B35]" />
+                      Músicas Encontradas
+                    </h2>
+                    <div className="bg-[#333333]/20 rounded-3xl p-4 sm:p-6 border border-[#333333] space-y-2">
+                      {filteredTracks.map((track, idx) => (
+                        <div key={`${track.album.id}-${track.id}-${idx}`} className="flex items-center justify-between p-3 rounded-xl hover:bg-[#333333]/40 transition-colors group">
+                          <div className="flex items-center gap-4 overflow-hidden">
+                            <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-[#333333]">
+                              <img src={track.album.coverUrl} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-bold text-white truncate">{track.title}</p>
+                              <div className="flex flex-wrap items-center gap-x-2 text-sm text-[#E0E0E0]">
+                                <span className="truncate">{track.album.artist}</span>
+                                <span className="text-[#333333]">•</span>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setExpandedAlbumId(track.album.id);
+                                    // Scroll behavior could be added here
+                                  }}
+                                  className="text-[#FF6B35] font-medium hover:underline truncate"
+                                >
+                                  Álbum: {track.album.title}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => {
+                                const tracks = track.album.tracks || [];
+                                const trackIndex = tracks.findIndex(t => t.id === track.id);
+                                handleSelectAlbum(track.album, trackIndex !== -1 ? trackIndex : 0);
+                              }}
+                              className="p-2 sm:p-3 bg-[#FF6B35] text-white rounded-full hover:scale-110 transition-transform shadow-lg"
+                              title="Tocar Música"
+                            >
+                              <Icons.Play className="w-4 h-4 sm:w-5 sm:h-5 ml-0.5 sm:ml-1" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </>
+            )}
+
             <section>
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-semibold border-b-2 border-[#FF6B35] pb-2">
-                  {searchQuery ? `Resultados para "${searchQuery}"` : 'Álbuns em Destaque'}
+                  {searchQuery ? `Álbuns Relacionados` : 'Álbuns em Destaque'}
                 </h2>
                 {searchQuery && (
                   <button

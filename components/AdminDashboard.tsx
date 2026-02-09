@@ -17,7 +17,7 @@ const GENRES = [
   "Electronic", "House", "Techno", "Trance", "Dubstep", "Drum & Bass",
   "Ambient", "Synthwave", "Lo-Fi", "Disco", "Funk", "Latin", "K-Pop", "J-Pop",
   "Soundtrack", "Podcast", "Sertanejo", "Samba", "Pagode", "Brega",
-  "Balada Pop", "Surf Music", "Instrumental", "Bossa Nova", "Gospel", "Cordel"
+  "Balada Pop", "Surf Music", "Instrumental", "Bossa Nova", "MPB", "Gospel", "Cordel"
 ];
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit, onUpdateAlbum }) => {
