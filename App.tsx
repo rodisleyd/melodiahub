@@ -447,239 +447,245 @@ const AppContent: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <AuthProvider>
-      <div className="flex min-h-screen relative bg-[#1A1A2E] text-white">
-        <Sidebar
-          currentView={currentView}
-          onViewChange={handleViewChange}
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-        />
+    <div className="flex min-h-screen relative bg-[#1A1A2E] text-white">
+      <Sidebar
+        currentView={currentView}
+        onViewChange={handleViewChange}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
 
-        {/* Mobile Top Bar */}
-        <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-[#1A1A2E] border-b border-[#333333] px-4 py-3 flex items-center justify-between shadow-2xl">
-          <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="MelodiaHub" className="h-6 w-auto" />
-            <span className="text-sm font-bold tracking-widest text-[#E0E0E0] uppercase">melody<span className="text-[#FF6B35]">HUB</span></span>
-          </div>
-          <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-white">
-            <Icons.Menu className="w-6 h-6" />
-          </button>
+      {/* Mobile Top Bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-[#1A1A2E] border-b border-[#333333] px-4 py-3 flex items-center justify-between shadow-2xl">
+        <div className="flex items-center gap-2">
+          <img src="/logo.png" alt="MelodiaHub" className="h-6 w-auto" />
+          <span className="text-sm font-bold tracking-widest text-[#E0E0E0] uppercase">melody<span className="text-[#FF6B35]">HUB</span></span>
         </div>
+        <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-white">
+          <Icons.Menu className="w-6 h-6" />
+        </button>
+      </div>
 
-        <main className="flex-1 md:ml-64 p-4 md:p-8 pt-24 md:pt-8 lg:p-12 overflow-x-hidden">
-          {isAuthLoading || isDataLoading ? (
-            <div className="flex items-center justify-center h-full">Carregando MelodiaHub...</div>
-          ) : (
-            <>
-              {currentView === 'LOGIN' && <Login onViewChange={setCurrentView} />}
-              {currentView === 'REGISTER' && <Register onViewChange={setCurrentView} />}
-              {currentView === 'EXPLORE' && (
-                <div className="animate-in fade-in duration-500">
-                  {/* EXPLORE VIEW SECTIONS */}
-                  <header className="hidden md:flex mb-12 flex-col xl:flex-row xl:items-end justify-between gap-8">
-                    <div className="flex-1">
-                      <h1 className="text-5xl font-semibold tracking-tight mb-4 text-white">Descubra novos sons</h1>
-                      <p className="text-[#E0E0E0] text-lg max-w-2xl">O seu santuário digital para curadoria de áudio.</p>
-                    </div>
-                  </header>
-
-                  {/* Search */}
-                  <div className="mb-12 max-w-xl">
-                    <div className="relative group">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <Icons.Search className="w-5 h-5 text-[#E0E0E0]" />
-                      </div>
-                      <input
-                        type="text"
-                        placeholder="Pesquisar..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="block w-full pl-12 pr-12 py-3 bg-[#333333]/20 border border-[#333333] rounded-2xl text-white outline-none focus:border-[#FF6B35] transition-all"
-                      />
-                    </div>
+      <main className="flex-1 md:ml-64 p-4 md:p-8 pt-24 md:pt-8 lg:p-12 overflow-x-hidden">
+        {isAuthLoading || isDataLoading ? (
+          <div className="flex items-center justify-center h-full">Carregando MelodiaHub...</div>
+        ) : (
+          <>
+            {currentView === 'LOGIN' && <Login onViewChange={setCurrentView} />}
+            {currentView === 'REGISTER' && <Register onViewChange={setCurrentView} />}
+            {currentView === 'EXPLORE' && (
+              <div className="animate-in fade-in duration-500">
+                {/* EXPLORE VIEW SECTIONS */}
+                <header className="hidden md:flex mb-12 flex-col xl:flex-row xl:items-end justify-between gap-8">
+                  <div className="flex-1">
+                    <h1 className="text-5xl font-semibold tracking-tight mb-4 text-white">Descubra novos sons</h1>
+                    <p className="text-[#E0E0E0] text-lg max-w-2xl">O seu santuário digital para curadoria de áudio.</p>
                   </div>
+                </header>
 
-                  {!searchQuery && (
-                    <>
-                      {/* 1. Álbuns em Destaque */}
-                      <section className="mb-12">
-                        <h2 className="text-xl md:text-2xl font-semibold border-b-2 border-[#FF6B35] pb-2 mb-8 inline-block">Álbuns em Destaque</h2>
-                        <div className="flex md:grid overflow-x-auto md:overflow-visible pb-8 gap-6 scrollbar-hide md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                          {filteredAlbums.map(album => (
-                            <div key={album.id} className="w-72 flex-shrink-0 md:w-auto">{renderAlbumCard(album)}</div>
-                          ))}
-                        </div>
-                      </section>
+                {/* Search */}
+                <div className="mb-12 max-w-xl">
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Icons.Search className="w-5 h-5 text-[#E0E0E0]" />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Pesquisar..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="block w-full pl-12 pr-12 py-3 bg-[#333333]/20 border border-[#333333] rounded-2xl text-white outline-none focus:border-[#FF6B35] transition-all"
+                    />
+                  </div>
+                </div>
 
-                      {/* 2. Em Alta */}
-                      <section className="mb-12">
-                        <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
-                          <Icons.TrendingUp className="w-8 h-8 text-[#FF6B35]" /> Em Alta
-                        </h2>
-                        <div className="bg-[#333333]/20 rounded-3xl p-6 border border-[#333333]">
-                          <div className="flex overflow-x-auto pb-4 gap-4 scrollbar-hide md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-                            {albums.flatMap(a => (a.tracks || []).map(t => ({ ...t, album: a })))
-                              .sort((a, b) => (b.playCount || 0) - (a.playCount || 0))
-                              .slice(0, 5)
-                              .map((track, idx) => (
-                                <div key={idx} onClick={() => handleSelectAlbum(track.album)} className="flex-shrink-0 w-64 md:w-auto bg-[#1A1A2E] p-3 rounded-xl flex items-center gap-3 border border-[#333333] cursor-pointer hover:border-[#FF6B35]">
-                                  <img src={track.album.coverUrl} className="w-12 h-12 rounded object-cover" />
-                                  <div className="flex-1 min-w-0">
-                                    <p className="font-bold text-sm text-white truncate">{track.title}</p>
-                                    <p className="text-xs text-[#E0E0E0] truncate">{track.album.artist}</p>
-                                  </div>
-                                </div>
-                              ))}
-                          </div>
-                        </div>
-                      </section>
-
-                      {/* 3. Playlists de Ouvintes */}
-                      <section className="mb-12">
-                        <div className="flex items-center justify-between mb-6">
-                          <h2 className="text-sm font-bold uppercase tracking-widest text-[#FF6B35]">Playlists de Ouvintes</h2>
-                          <button onClick={() => setCurrentView('COMMUNITY_PLAYLISTS')} className="text-xs font-bold uppercase tracking-widest text-[#E0E0E0] hover:text-[#FF6B35]">Veja +</button>
-                        </div>
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                          {communityPlaylists.slice(0, 4).map(playlist => (
-                            <div key={playlist.id} onClick={() => handlePlayPlaylist(playlist)} className="bg-[#333333]/20 p-3 rounded-xl border border-[#333333] flex items-center gap-3 cursor-pointer">
-                              <img src={playlist.coverUrl} className="w-10 h-10 rounded object-cover" />
-                              <div className="min-w-0 flex-1">
-                                <p className="text-xs font-bold text-white truncate">{playlist.name}</p>
-                                <p className="text-[10px] text-[#FF6B35] truncate">{playlist.ownerName}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </section>
-                    </>
-                  )}
-
-                  {searchQuery && (
-                    <section className="animate-in slide-in-from-bottom-4 duration-500">
-                      <h2 className="text-2xl font-semibold mb-8">Resultados para "{searchQuery}"</h2>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {filteredAlbums.map(album => renderAlbumCard(album))}
+                {!searchQuery && (
+                  <>
+                    {/* 1. Álbuns em Destaque */}
+                    <section className="mb-12">
+                      <h2 className="text-xl md:text-2xl font-semibold border-b-2 border-[#FF6B35] pb-2 mb-8 inline-block">Álbuns em Destaque</h2>
+                      <div className="flex md:grid overflow-x-auto md:overflow-visible pb-8 gap-6 scrollbar-hide md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {filteredAlbums.map(album => (
+                          <div key={album.id} className="w-72 flex-shrink-0 md:w-auto">{renderAlbumCard(album)}</div>
+                        ))}
                       </div>
                     </section>
-                  )}
 
-                  <footer className="py-10 border-t border-[#333333]/50 text-center">
-                    <p className="text-[#E0E0E0]/30 text-[10px] font-medium tracking-widest uppercase">Desenvolvido por: 2026 - Rodisley Comunicação Visual</p>
-                  </footer>
-                </div>
-              )}
-              {currentView === 'FAVORITES' && (
-                <div className="animate-in fade-in duration-500">
-                  <h1 className="text-4xl font-bold mb-8">Meus Favoritos</h1>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                    {favoriteAlbums.map(renderAlbumCard)}
-                  </div>
-                </div>
-              )}
-              {currentView === 'PLAYLISTS' && (
-                <div className="animate-in fade-in duration-500">
-                  <h1 className="text-4xl font-bold mb-8">Minhas Playlists</h1>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {myPlaylists.map(playlist => renderPlaylistCard(playlist))}
-                  </div>
-                </div>
-              )}
-              {currentView === 'COMMUNITY_PLAYLISTS' && (
-                <div className="animate-in fade-in duration-500">
-                  <h1 className="text-4xl font-bold mb-8">Comunidade</h1>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {communityPlaylists.map(playlist => renderPlaylistCard(playlist, true))}
-                  </div>
-                </div>
-              )}
-              {currentView === 'MY_ALBUMS' && (
-                <div className="animate-in fade-in duration-500">
-                  <h1 className="text-4xl font-bold mb-8">Minha Biblioteca</h1>
-                  <div className="grid grid-cols-1 gap-6">
-                    {albums.map(album => (
-                      <div key={album.id} className="bg-[#333333]/20 p-6 rounded-3xl border border-[#333333] flex items-center gap-6">
-                        <img src={album.coverUrl} className="w-24 h-24 rounded-xl object-cover" />
-                        <div className="flex-1">
-                          <h3 className="text-xl font-semibold">{album.title}</h3>
-                          <p className="text-[#E0E0E0]">{album.artist}</p>
-                          <div className="flex gap-4 mt-4">
-                            <button onClick={() => handleEditClick(album)} className="text-xs font-bold text-[#FF6B35]">EDITAR</button>
-                            <button onClick={() => handleDeleteClick(album.id)} className="text-xs font-bold text-red-500">EXCLUIR</button>
-                          </div>
+                    {/* 2. Em Alta */}
+                    <section className="mb-12">
+                      <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
+                        <Icons.TrendingUp className="w-8 h-8 text-[#FF6B35]" /> Em Alta
+                      </h2>
+                      <div className="bg-[#333333]/20 rounded-3xl p-6 border border-[#333333]">
+                        <div className="flex overflow-x-auto pb-4 gap-4 scrollbar-hide md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+                          {albums.flatMap(a => (a.tracks || []).map(t => ({ ...t, album: a })))
+                            .sort((a, b) => (b.playCount || 0) - (a.playCount || 0))
+                            .slice(0, 5)
+                            .map((track, idx) => (
+                              <div key={idx} onClick={() => handleSelectAlbum(track.album)} className="flex-shrink-0 w-64 md:w-auto bg-[#1A1A2E] p-3 rounded-xl flex items-center gap-3 border border-[#333333] cursor-pointer hover:border-[#FF6B35]">
+                                <img src={track.album.coverUrl} className="w-12 h-12 rounded object-cover" />
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-bold text-sm text-white truncate">{track.title}</p>
+                                  <p className="text-xs text-[#E0E0E0] truncate">{track.album.artist}</p>
+                                </div>
+                              </div>
+                            ))}
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    </section>
+
+                    {/* 3. Playlists de Ouvintes */}
+                    <section className="mb-12">
+                      <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-sm font-bold uppercase tracking-widest text-[#FF6B35]">Playlists de Ouvintes</h2>
+                        <button onClick={() => setCurrentView('COMMUNITY_PLAYLISTS')} className="text-xs font-bold uppercase tracking-widest text-[#E0E0E0] hover:text-[#FF6B35]">Veja +</button>
+                      </div>
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        {communityPlaylists.slice(0, 4).map(playlist => (
+                          <div key={playlist.id} onClick={() => handlePlayPlaylist(playlist)} className="bg-[#333333]/20 p-3 rounded-xl border border-[#333333] flex items-center gap-3 cursor-pointer">
+                            <img src={playlist.coverUrl} className="w-10 h-10 rounded object-cover" />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs font-bold text-white truncate">{playlist.name}</p>
+                              <p className="text-[10px] text-[#FF6B35] truncate">{playlist.ownerName}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  </>
+                )}
+
+                {searchQuery && (
+                  <section className="animate-in slide-in-from-bottom-4 duration-500">
+                    <h2 className="text-2xl font-semibold mb-8">Resultados para "{searchQuery}"</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                      {filteredAlbums.map(album => renderAlbumCard(album))}
+                    </div>
+                  </section>
+                )}
+
+                <footer className="py-10 border-t border-[#333333]/50 text-center">
+                  <p className="text-[#E0E0E0]/30 text-[10px] font-medium tracking-widest uppercase">Desenvolvido por: 2026 - Rodisley Comunicação Visual</p>
+                </footer>
+              </div>
+            )}
+            {currentView === 'FAVORITES' && (
+              <div className="animate-in fade-in duration-500">
+                <h1 className="text-4xl font-bold mb-8">Meus Favoritos</h1>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                  {favoriteAlbums.map(renderAlbumCard)}
                 </div>
-              )}
-              {currentView === 'ADMIN_CREATE' && <AdminDashboard onAddAlbum={handleAddAlbum} />}
-              {currentView === 'EDIT_ALBUM' && <AdminDashboard onAddAlbum={handleAddAlbum} albumToEdit={editingAlbum} onUpdateAlbum={handleUpdateAlbum} />}
-              {currentView === 'SETTINGS' && <Settings onLogout={logout} />}
-            </>
-          )}
-        </main>
-
-        <Player
-          playerState={playerState}
-          onTogglePlay={handleTogglePlay}
-          onNext={handleNext}
-          onPrev={handlePrev}
-          onVolumeChange={handleVolumeChange}
-          onShare={(track, album) => handleTrackAction('share', track, album)}
-          onToggleShuffle={handleToggleShuffle}
-          onTrackPlay={(track, album) => dbService.incrementPlayCount(album.id, track.id)}
-          onLike={handleLike}
-          isRadioMode={isRadioMode}
-          onToggleRadio={() => isRadioMode ? setIsRadioMode(false) : handleStartRadio()}
-        />
-
-        <ShareModal
-          isOpen={modalState.type === 'SHARE'}
-          onClose={() => setModalState({ ...modalState, type: null })}
-          track={modalState.track}
-          album={modalState.album}
-        />
-        <PlaylistModal
-          isOpen={modalState.type === 'PLAYLIST'}
-          onClose={() => setModalState({ ...modalState, type: null })}
-          playlists={myPlaylists}
-          onCreatePlaylist={handleCreatePlaylist}
-          onToBeAddedToPlaylist={handleAddToPlaylist}
-        />
-        <EditPlaylistModal
-          isOpen={!!editingPlaylist}
-          onClose={() => setEditingPlaylist(null)}
-          playlist={editingPlaylist}
-          onUpdate={handleUpdatePlaylist}
-          onDelete={handleDeletePlaylist}
-        />
-
-        {showCommercial && (
-          <div className="fixed inset-0 z-[110] bg-black flex flex-col items-center justify-center p-4">
-            <video
-              src={COMMERCIAL_URL}
-              autoPlay
-              onEnded={() => { setShowCommercial(false); playRandomTrack(); }}
-              className="max-w-4xl w-full aspect-video rounded-3xl"
-            />
-            <button onClick={() => { setShowCommercial(false); playRandomTrack(); }} className="mt-8 text-white/30 hover:text-white text-sm">Pular</button>
-          </div>
+              </div>
+            )}
+            {currentView === 'PLAYLISTS' && (
+              <div className="animate-in fade-in duration-500">
+                <h1 className="text-4xl font-bold mb-8">Minhas Playlists</h1>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {myPlaylists.map(playlist => renderPlaylistCard(playlist))}
+                </div>
+              </div>
+            )}
+            {currentView === 'COMMUNITY_PLAYLISTS' && (
+              <div className="animate-in fade-in duration-500">
+                <h1 className="text-4xl font-bold mb-8">Comunidade</h1>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {communityPlaylists.map(playlist => renderPlaylistCard(playlist, true))}
+                </div>
+              </div>
+            )}
+            {currentView === 'MY_ALBUMS' && (
+              <div className="animate-in fade-in duration-500">
+                <h1 className="text-4xl font-bold mb-8">Minha Biblioteca</h1>
+                <div className="grid grid-cols-1 gap-6">
+                  {albums.map(album => (
+                    <div key={album.id} className="bg-[#333333]/20 p-6 rounded-3xl border border-[#333333] flex items-center gap-6">
+                      <img src={album.coverUrl} className="w-24 h-24 rounded-xl object-cover" />
+                      <div className="flex-1">
+                        <h3 className="text-xl font-semibold">{album.title}</h3>
+                        <p className="text-[#E0E0E0]">{album.artist}</p>
+                        <div className="flex gap-4 mt-4">
+                          <button onClick={() => handleEditClick(album)} className="text-xs font-bold text-[#FF6B35]">EDITAR</button>
+                          <button onClick={() => handleDeleteClick(album.id)} className="text-xs font-bold text-red-500">EXCLUIR</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {currentView === 'ADMIN_CREATE' && <AdminDashboard onAddAlbum={handleAddAlbum} />}
+            {currentView === 'EDIT_ALBUM' && <AdminDashboard onAddAlbum={handleAddAlbum} albumToEdit={editingAlbum} onUpdateAlbum={handleUpdateAlbum} />}
+            {currentView === 'SETTINGS' && <Settings onLogout={logout} />}
+          </>
         )}
+      </main>
 
-        {showRadioSplash && !splashData && <RadioSplash onStart={handleStartRadio} />}
+      <Player
+        playerState={playerState}
+        onTogglePlay={handleTogglePlay}
+        onNext={handleNext}
+        onPrev={handlePrev}
+        onVolumeChange={handleVolumeChange}
+        onShare={(track, album) => handleTrackAction('share', track, album)}
+        onToggleShuffle={handleToggleShuffle}
+        onTrackPlay={(track, album) => dbService.incrementPlayCount(album.id, track.id)}
+        onLike={handleLike}
+        isRadioMode={isRadioMode}
+        onToggleRadio={() => isRadioMode ? setIsRadioMode(false) : handleStartRadio()}
+      />
 
-        {splashData && (
-          <div onClick={() => { setIsRadioMode(false); setShowRadioSplash(false); handleSelectAlbum(splashData.album, splashData.trackIndex); setSplashData(null); }} className="fixed inset-0 z-[100] bg-[#1A1A2E] flex flex-col items-center justify-center p-6 cursor-pointer">
-            <img src={splashData.album.coverUrl} className="w-64 h-64 md:w-80 md:h-80 rounded-3xl shadow-2xl mb-8" />
-            <h2 className="text-3xl font-bold text-white mb-2">{splashData.album.tracks?.[splashData.trackIndex]?.title}</h2>
-            <p className="text-xl text-[#FF6B35] font-medium">{splashData.album.artist}</p>
-          </div>
-        )}
-      </div>
+      <ShareModal
+        isOpen={modalState.type === 'SHARE'}
+        onClose={() => setModalState({ ...modalState, type: null })}
+        track={modalState.track}
+        album={modalState.album}
+      />
+      <PlaylistModal
+        isOpen={modalState.type === 'PLAYLIST'}
+        onClose={() => setModalState({ ...modalState, type: null })}
+        playlists={myPlaylists}
+        onCreatePlaylist={handleCreatePlaylist}
+        onToBeAddedToPlaylist={handleAddToPlaylist}
+      />
+      <EditPlaylistModal
+        isOpen={!!editingPlaylist}
+        onClose={() => setEditingPlaylist(null)}
+        playlist={editingPlaylist}
+        onUpdate={handleUpdatePlaylist}
+        onDelete={handleDeletePlaylist}
+      />
+
+      {showCommercial && (
+        <div className="fixed inset-0 z-[110] bg-black flex flex-col items-center justify-center p-4">
+          <video
+            src={COMMERCIAL_URL}
+            autoPlay
+            onEnded={() => { setShowCommercial(false); playRandomTrack(); }}
+            className="max-w-4xl w-full aspect-video rounded-3xl"
+          />
+          <button onClick={() => { setShowCommercial(false); playRandomTrack(); }} className="mt-8 text-white/30 hover:text-white text-sm">Pular</button>
+        </div>
+      )}
+
+      {showRadioSplash && !splashData && <RadioSplash onStart={handleStartRadio} />}
+
+      {splashData && (
+        <div onClick={() => { setIsRadioMode(false); setShowRadioSplash(false); handleSelectAlbum(splashData.album, splashData.trackIndex); setSplashData(null); }} className="fixed inset-0 z-[100] bg-[#1A1A2E] flex flex-col items-center justify-center p-6 cursor-pointer">
+          <img src={splashData.album.coverUrl} className="w-64 h-64 md:w-80 md:h-80 rounded-3xl shadow-2xl mb-8" />
+          <h2 className="text-3xl font-bold text-white mb-2">{splashData.album.tracks?.[splashData.trackIndex]?.title}</h2>
+          <p className="text-xl text-[#FF6B35] font-medium">{splashData.album.artist}</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <AppContent />
     </AuthProvider>
   );
 };
 
-export default AppContent;
+export default App;
