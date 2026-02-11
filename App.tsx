@@ -493,7 +493,8 @@ const AppContent: React.FC = () => {
       case 'EXPLORE':
         return (
           <div className="">
-            <header className="mb-12 flex flex-col xl:flex-row xl:items-end justify-between gap-8">
+            {/* Desktop Header */}
+            <header className="hidden md:flex mb-12 flex-col xl:flex-row xl:items-end justify-between gap-8">
               <div className="flex-1">
                 <h1 className="text-5xl font-semibold tracking-tight mb-4">Descubra novos sons</h1>
                 <p className="text-[#E0E0E0] text-lg max-w-2xl">
@@ -519,7 +520,34 @@ const AppContent: React.FC = () => {
               )}
             </header>
 
-            <div className="mb-12 max-w-xl">
+            {/* Mobile Header (Search moved here in mockup) */}
+            <div className="md:hidden mt-4 mb-8">
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <svg className="w-5 h-5 text-[#E0E0E0] group-focus-within:text-[#FF6B35] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Pesquisar álbuns, artistas ou gêneros..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="block w-full pl-12 pr-12 py-3 bg-[#333333]/20 border border-[#333333] rounded-full text-white placeholder-[#E0E0E0]/50 focus:outline-none focus:border-[#FF6B35] focus:ring-1 focus:ring-[#FF6B35] transition-all shadow-lg text-sm"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#E0E0E0] hover:text-[#FF6B35] transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Desktop Search Bar */}
+            <div className="hidden md:block mb-12 max-w-xl">
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <svg className="w-5 h-5 text-[#E0E0E0] group-focus-within:text-[#FF6B35] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -545,54 +573,87 @@ const AppContent: React.FC = () => {
             </div>
 
             {!searchQuery && (
-              <section className="mb-12">
-                <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
-                  <Icons.TrendingUp className="w-8 h-8 text-[#FF6B35]" />
-                  Em Alta
-                </h2>
+              <>
+                {/* Em Alta (Small Cards Horizontal on Mobile) */}
+                <section className="mb-12">
+                  <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
+                    <Icons.TrendingUp className="w-8 h-8 text-[#FF6B35]" />
+                    Em Alta
+                  </h2>
 
-                <div className="bg-[#333333]/20 rounded-3xl p-4 sm:p-6 border border-[#333333]">
-                  {/* Top Tracks Logic */}
-                  {(() => {
-                    const allTracks = albums.flatMap(a => (a.tracks || []).map(t => ({ ...t, album: a })));
-                    const topTracks = allTracks.sort((a, b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 5);
+                  <div className="bg-[#333333]/20 rounded-3xl p-4 sm:p-6 border border-[#333333]">
+                    {(() => {
+                      const allTracks = albums.flatMap(a => (a.tracks || []).map(t => ({ ...t, album: a })));
+                      const topTracks = allTracks.sort((a, b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 5);
 
-                    if (topTracks.length === 0 || !topTracks[0].playCount) {
-                      return <p className="text-[#E0E0E0]/50 italic text-sm">As estatísticas aparecerão conforme as músicas forem tocadas.</p>;
-                    }
+                      if (topTracks.length === 0 || !topTracks[0].playCount) {
+                        return <p className="text-[#E0E0E0]/50 italic text-sm">As estatísticas aparecerão conforme as músicas forem tocadas.</p>;
+                      }
 
-                    return (
-                      <div className="flex overflow-x-auto pb-4 gap-4 scrollbar-hide -mx-2 px-2 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 md:overflow-visible">
-                        {topTracks.map((track, idx) => (
-                          <div
-                            key={`${track.album.id}-${track.id}`}
-                            className="flex-shrink-0 w-64 md:w-auto bg-[#1A1A2E] p-2.5 rounded-xl hover:bg-[#333333] transition-all group flex items-center gap-3 border border-[#333333]/50 hover:border-[#FF6B35]/50 cursor-pointer"
-                            onClick={() => {
-                              const trackIndex = (track.album.tracks || []).findIndex(t => t.id === track.id);
-                              handleSelectAlbum(track.album, trackIndex !== -1 ? trackIndex : 0);
-                            }}
-                          >
-                            <div className="relative w-14 h-14 flex-shrink-0">
-                              <img src={track.album.coverUrl} className="w-full h-full object-cover rounded-md" />
-                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-md text-white">
-                                <Icons.Play className="w-5 h-5" />
+                      return (
+                        <div className="flex overflow-x-auto pb-4 gap-4 scrollbar-hide -mx-2 px-2 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 md:overflow-visible">
+                          {topTracks.map((track, idx) => (
+                            <div
+                              key={`${track.album.id}-${track.id}`}
+                              className="flex-shrink-0 w-64 md:w-auto bg-[#1A1A2E] p-2.5 rounded-xl hover:bg-[#333333] transition-all group flex items-center gap-3 border border-[#333333]/50 hover:border-[#FF6B35]/50 cursor-pointer"
+                              onClick={() => {
+                                const trackIndex = (track.album.tracks || []).findIndex(t => t.id === track.id);
+                                handleSelectAlbum(track.album, trackIndex !== -1 ? trackIndex : 0);
+                              }}
+                            >
+                              <div className="relative w-14 h-14 flex-shrink-0">
+                                <img src={track.album.coverUrl} className="w-full h-full object-cover rounded-md" />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-md text-white">
+                                  <Icons.Play className="w-5 h-5" />
+                                </div>
+                              </div>
+
+                              <div className="flex-1 min-w-0 overflow-hidden">
+                                <div className="flex items-center gap-2 mb-0.5">
+                                  <span className="text-xs font-bold text-[#FF6B35]">#{idx + 1}</span>
+                                  <h3 className="font-bold text-white text-sm truncate" title={track.title}>{track.title}</h3>
+                                </div>
+                                <p className="text-xs text-[#E0E0E0] truncate">{track.album.artist}</p>
                               </div>
                             </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </section>
 
-                            <div className="flex-1 min-w-0 overflow-hidden">
-                              <div className="flex items-center gap-2 mb-0.5">
-                                <span className="text-xs font-bold text-[#FF6B35]">#{idx + 1}</span>
-                                <h3 className="font-bold text-white text-sm truncate" title={track.title}>{track.title}</h3>
-                              </div>
-                              <p className="text-xs text-[#E0E0E0] truncate">{track.album.artist}</p>
-                            </div>
-                          </div>
-                        ))}
+                {/* Playlists de Ouvintes (Visible on mobile here) */}
+                <section className="md:hidden mb-12">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-[#FF6B35]">Playlists de Ouvintes</h2>
+                    <button
+                      onClick={() => setCurrentView('COMMUNITY_PLAYLISTS')}
+                      className="px-4 py-1.5 bg-[#333333]/40 border border-[#333333] rounded-full text-[10px] font-bold uppercase tracking-widest text-white hover:text-[#FF6B35] transition-colors"
+                    >
+                      Veja +
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {communityPlaylists.slice(0, 4).map(playlist => (
+                      <div
+                        key={playlist.id}
+                        className="bg-[#333333]/20 p-2.5 rounded-xl border border-[#333333] flex items-center gap-3 active:scale-95 transition-transform"
+                        onClick={() => handlePlayPlaylist(playlist, 0)}
+                      >
+                        <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 relative">
+                          <img src={playlist.coverUrl} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h4 className="text-[11px] font-bold text-white truncate leading-tight">{playlist.name}</h4>
+                          <p className="text-[9px] text-[#FF6B35] truncate font-medium">{playlist.ownerName || 'Visitante'}</p>
+                        </div>
+                        <Icons.Play className="w-3 h-3 text-[#FF6B35] flex-shrink-0" />
                       </div>
-                    );
-                  })()}
-                </div>
-              </section>
+                    ))}
+                  </div>
+                </section>
+              </>
             )}
 
             {searchQuery && (
@@ -648,8 +709,7 @@ const AppContent: React.FC = () => {
                 )}
               </>
             )}
-
-            <section>
+            <section className="mb-20">
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-semibold border-b-2 border-[#FF6B35] pb-2">
                   {searchQuery ? `Álbuns Relacionados` : 'Álbuns em Destaque'}
@@ -664,22 +724,25 @@ const AppContent: React.FC = () => {
                 )}
               </div>
 
-              {filteredAlbums.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                  {filteredAlbums.map(renderAlbumCard)}
-                </div>
-              ) : (
-                <div className="text-center py-20 bg-[#333333]/10 rounded-[3rem] border border-dashed border-[#333333]">
-                  <Icons.Music className="w-16 h-16 text-[#333333] mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-[#E0E0E0]">
-                    {searchQuery ? 'Nenhum álbum encontrado' : 'Nenhum álbum disponível'}
-                  </h3>
-                  {!searchQuery && (
-                    <p className="mt-2 text-[#E0E0E0]/60">Seja o primeiro a publicar um álbum!</p>
-                  )}
-                </div>
+              {!searchQuery && albums.length === 0 && (
+                <p className="mt-2 text-[#E0E0E0]/60">Seja o primeiro a publicar um álbum!</p>
               )}
+
+              <div className="flex md:grid overflow-x-auto md:overflow-visible pb-8 gap-6 scrollbar-hide -mx-4 px-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:-mx-0 md :px-0">
+                {filteredAlbums.map((album) => (
+                  <div key={album.id} className="w-72 flex-shrink-0 md:w-auto">
+                    {renderAlbumCard(album)}
+                  </div>
+                ))}
+              </div>
             </section>
+
+            {/* Footer Only Mobile */}
+            <footer className="md:hidden py-10 border-t border-[#333333]/50 text-center">
+              <p className="text-[#E0E0E0]/30 text-[10px] font-medium tracking-widest uppercase">
+                Desenvolvido por: 2026 - Rodisley Comunicação Visual
+              </p>
+            </footer>
           </div>
         );
       case 'FAVORITES':
@@ -936,13 +999,19 @@ const AppContent: React.FC = () => {
       />
 
       {/* Mobile Top Bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-30 bg-[#1A1A2E]/90 backdrop-blur-md border-b border-[#333333] px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button onClick={() => setIsSidebarOpen(true)} className="p-2 -ml-2 text-white hover:bg-[#333333] rounded-lg">
-            <Icons.Menu className="w-6 h-6" />
-          </button>
-          <img src="/logo.png" alt="MelodiaHub" className="h-8 w-auto" />
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-[#1A1A2E] border-b border-[#333333] px-4 py-3 flex items-center justify-between shadow-2xl">
+        <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-white">
+          <Icons.Menu className="w-6 h-6" />
+        </button>
+
+        <div className="flex items-center gap-2">
+          <img src="/logo.png" alt="MelodiaHub" className="h-6 w-auto" />
+          <span className="text-sm font-bold tracking-widest text-[#E0E0E0] uppercase">melody<span className="text-[#FF6B35]">HUB</span></span>
         </div>
+
+        <button className="p-2 text-white">
+          <Icons.Menu className="w-6 h-6" />
+        </button>
       </div>
 
       <main className="flex-1 md:ml-64 p-4 md:p-8 pt-24 md:pt-8 lg:p-12 overflow-x-hidden">

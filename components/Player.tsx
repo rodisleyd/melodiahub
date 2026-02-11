@@ -126,7 +126,7 @@ const Player: React.FC<PlayerProps> = ({
   if (!currentAlbum || !currentTrack) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-[#1A1A2E]/95 backdrop-blur-2xl border-t border-[#333333] px-6 py-4 z-50 animate-in slide-in-from-bottom duration-500">
+    <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-[#1A1A2E] border-t border-[#333333] z-50 animate-in slide-in-from-bottom duration-500">
       <audio
         ref={audioRef}
         src={currentTrack.url}
@@ -135,129 +135,153 @@ const Player: React.FC<PlayerProps> = ({
         onLoadedMetadata={handleTimeUpdate}
       />
 
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 md:gap-8">
-        {/* Informações do Álbum */}
-        <div className="flex items-center gap-3 w-1/3 md:w-1/4 min-w-0">
-          <img
-            src={currentAlbum.coverUrl}
-            alt={currentAlbum.title}
-            className="w-10 h-10 md:w-14 md:h-14 rounded-lg object-cover shadow-2xl border border-[#333333] flex-shrink-0"
-          />
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 overflow-hidden">
-              <h4 className="text-[13px] md:text-sm font-bold text-white truncate leading-tight">{currentTrack.title}</h4>
-              {isRadioMode && (
-                <span className="flex-shrink-0 px-1 py-0.5 bg-[#FF6B35] text-white text-[8px] font-bold rounded uppercase tracking-wider">
-                  Radio
-                </span>
-              )}
-            </div>
-            <p className="text-[10px] md:text-xs text-[#E0E0E0] truncate opacity-70">{currentAlbum.artist}</p>
-          </div>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => onLike(currentAlbum.id, currentTrack.id)}
-              className="text-[#E0E0E0] hover:text-[#FF6B35] transition-colors p-1 flex items-center gap-1 group/like"
-              title="Curtir"
-            >
-              <Icons.Heart className={`w-4 h-4 md:w-5 md:h-5 ${currentTrack.isFavorite ? 'text-[#FF6B35] fill-[#FF6B35]' : ''}`} />
-              {currentTrack.likeCount && currentTrack.likeCount > 0 && (
-                <span className="text-[10px] font-bold text-[#E0E0E0]">{currentTrack.likeCount}</span>
-              )}
-            </button>
-            {currentTrack.videoUrl && (
-              <button
-                onClick={() => window.open(currentTrack.videoUrl, '_blank')}
-                className="text-[#FF6B35] animate-pulse p-1"
-                title="Assistir Clipe"
-              >
-                <Icons.Video className="w-4 h-4 md:w-5 md:h-5" />
-              </button>
-            )}
-          </div>
-        </div>
+      {/* Progress Bar (at the very top of the player on mobile, but part of the box) */}
+      <div
+        ref={progressBarRef}
+        onClick={handleSeek}
+        className="h-1 bg-[#333333] relative cursor-pointer group"
+      >
+        <div
+          className="absolute top-0 left-0 h-full bg-[#FF6B35] transition-all duration-100"
+          style={{ width: `${(currentTime / duration) * 100 || 0}%` }}
+        />
+      </div>
 
-        {/* Controles Principais */}
-        <div className="flex flex-col items-center gap-1 md:gap-2 flex-1 max-w-xl">
-          <div className="flex items-center gap-3 md:gap-8">
-            <button
-              onClick={onToggleShuffle}
-              className={`transition-colors ${isShuffle ? 'text-[#FF6B35]' : 'text-[#E0E0E0]'}`}
-              title="Aleatório"
-            >
-              <Icons.Shuffle className="w-4 h-4 md:w-5 md:h-5" />
-            </button>
-
-            <button onClick={onPrev} className="text-[#E0E0E0] hover:text-[#FF6B35] transition-colors">
-              <Icons.SkipBack className="w-5 h-5 md:w-6 md:h-6" />
-            </button>
-
-            <button
-              onClick={onTogglePlay}
-              className="w-10 h-10 md:w-14 md:h-14 rounded-full bg-[#FF6B35] flex items-center justify-center text-white shadow-lg hover:scale-105 active:scale-95 transition-all"
-              aria-label={isPlaying ? "Pausar" : "Reproduzir"}
-            >
-              {isPlaying ? (
-                <Icons.Pause className="w-5 h-5 md:w-7 md:h-7" />
-              ) : (
-                <Icons.Play className="w-5 h-5 md:w-7 md:h-7 ml-0.5 md:ml-1" />
-              )}
-            </button>
-
-            <button onClick={onNext} className="text-[#E0E0E0] hover:text-[#FF6B35] transition-colors">
-              <Icons.SkipForward className="w-5 h-5 md:w-6 md:h-6" />
-            </button>
-
-            <button
-              onClick={onToggleRadio}
-              className={`transition-colors ${isRadioMode ? 'text-[#FF6B35]' : 'text-[#E0E0E0]'}`}
-              title="Radio MelodyHUB"
-            >
-              <Icons.Radio className="w-4 h-4 md:w-5 md:h-5" />
-            </button>
-          </div>
-
-          {/* Próxima Música - Preview */}
-          <div className="text-xs text-[#E0E0E0]/60 -mt-1 h-4">
-            {isRadioMode ? (
-              <span className="flex items-center gap-1 text-[#FF6B35] font-semibold"><Icons.Radio className="w-3 h-3" /> Radio MelodyHUB Ativa</span>
-            ) : isShuffle ? (
-              <span className="flex items-center gap-1"><Icons.Shuffle className="w-3 h-3" /> Próxima: Aleatória</span>
-            ) : (
-              <span>Próxima: {getNextTrackTitle()}</span>
-            )}
-          </div>
-
-          {/* Barra de Progresso Interativa */}
-          <div className="w-full flex items-center gap-3 text-xs text-[#E0E0E0] font-medium">
-            <span className="w-10 text-right">{formatTime(currentTime)}</span>
-            <div
-              ref={progressBarRef}
-              onClick={handleSeek}
-              className="flex-1 h-1.5 bg-[#333333] rounded-full relative cursor-pointer group"
-            >
-              <div
-                className="absolute top-0 left-0 h-full bg-[#FF6B35] rounded-full transition-all duration-100 group-hover:bg-[#FF8B5E]"
-                style={{ width: `${(currentTime / duration) * 100 || 0}%` }}
-              >
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg scale-0 group-hover:scale-100 transition-transform" />
+      <div className="px-4 py-3 sm:px-6 md:py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 md:gap-8">
+          {/* Informações do Álbum */}
+          <div className="flex items-center gap-2 md:gap-3 w-auto md:w-1/4 min-w-0">
+            <img
+              src={currentAlbum.coverUrl}
+              alt={currentAlbum.title}
+              className="w-10 h-10 md:w-14 md:h-14 rounded-lg object-cover shadow-2xl border border-[#333333] flex-shrink-0"
+            />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 overflow-hidden">
+                <h4 className="text-[12px] md:text-sm font-bold text-white truncate leading-tight">{currentTrack.title}</h4>
+                {isRadioMode && (
+                  <span className="hidden md:inline-block flex-shrink-0 px-1 py-0.5 bg-[#FF6B35] text-white text-[8px] font-bold rounded uppercase tracking-wider">
+                    Radio
+                  </span>
+                )}
               </div>
+              <p className="text-[10px] md:text-xs text-[#E0E0E0]/60 truncate">{currentAlbum.artist} {currentTrack.isFavorite ? '❤️' : ''}</p>
+              {isRadioMode && (
+                <div className="md:hidden flex items-center gap-1 mt-0.5">
+                  <span className="text-[#FF6B35] text-[8px] font-bold uppercase tracking-wider">Radio</span>
+                </div>
+              )}
             </div>
-            <span className="w-10">{formatTime(duration)}</span>
           </div>
-        </div>
 
-        {/* Controle de Volume */}
-        <div className="flex items-center gap-3 w-1/4 justify-end hidden sm:flex">
-          <Icons.Volume className="w-5 h-5 text-[#E0E0E0]" />
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={volume}
-            onChange={(e) => onVolumeChange(parseInt(e.target.value))}
-            className="w-24 h-1 bg-[#333333] accent-[#FF6B35] rounded-full appearance-none cursor-pointer hover:accent-[#FF8B5E]"
-          />
+          {/* Controles Principais */}
+          <div className="flex-1 flex flex-col items-center justify-center gap-0.5 max-w-xl">
+            <div className="flex items-center gap-4 sm:gap-6 md:gap-8">
+              <button
+                onClick={onToggleShuffle}
+                className={`hidden md:block transition-colors ${isShuffle ? 'text-[#FF6B35]' : 'text-[#E0E0E0]'}`}
+                title="Aleatório"
+              >
+                <Icons.Shuffle className="w-5 h-5" />
+              </button>
+
+              <button
+                onClick={onToggleShuffle}
+                className="md:hidden text-[#E0E0E0]/40"
+              >
+                <Icons.Shuffle className="w-4 h-4" />
+              </button>
+
+              <button onClick={onPrev} className="text-[#E0E0E0] hover:text-[#FF6B35] transition-colors">
+                <Icons.SkipBack className="w-5 h-5 md:w-6 md:h-6" />
+              </button>
+
+              <button
+                onClick={onTogglePlay}
+                className="w-10 h-10 md:w-14 md:h-14 rounded-full bg-[#FF6B35] flex items-center justify-center text-white shadow-lg hover:scale-105 active:scale-95 transition-all"
+                aria-label={isPlaying ? "Pausar" : "Reproduzir"}
+              >
+                {isPlaying ? (
+                  <Icons.Pause className="w-5 h-5 md:w-7 md:h-7" />
+                ) : (
+                  < Icons.Play className="w-5 h-5 md:w-7 md:h-7 ml-0.5 md:ml-1" />
+                )}
+              </button>
+
+              <button onClick={onNext} className="text-[#E0E0E0] hover:text-[#FF6B35] transition-colors">
+                <Icons.SkipForward className="w-5 h-5 md:w-6 md:h-6" />
+              </button>
+
+              <button
+                onClick={() => onLike(currentAlbum.id, currentTrack.id)}
+                className="md:hidden p-1 text-[#E0E0E0]"
+              >
+                <Icons.Plus className="w-5 h-5" />
+              </button>
+
+              <button
+                onClick={onToggleRadio}
+                className={`hidden md:block transition-colors ${isRadioMode ? 'text-[#FF6B35]' : 'text-[#E0E0E0]'}`}
+                title="Radio MelodyHUB"
+              >
+                <Icons.Radio className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Radio / Shuffle / Next info */}
+            <div className="flex items-center gap-2 mt-1">
+              {isRadioMode ? (
+                <div className="flex flex-col items-center">
+                  <span className="text-[9px] md:text-sm text-[#FF6B35]/80 font-bold uppercase tracking-widest flex items-center gap-1">
+                    <Icons.Radio className="w-3 h-3" /> Radio MelodyHUB Ativa
+                  </span>
+                  <div className="md:hidden flex items-center gap-3 text-[9px] text-[#E0E0E0]/40 font-mono mt-0.5">
+                    <span>Próx. música</span>
+                    <span className="w-12 h-1 bg-[#333333] rounded-full overflow-hidden">
+                      <div className="h-full bg-[#E0E0E0]/20 w-1/3" />
+                    </span>
+                    <span>{formatTime(currentTime)} / {formatTime(duration)}</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="hidden md:block text-xs text-[#E0E0E0]/60 -mt-1 h-4">
+                  {isShuffle ? (
+                    <span className="flex items-center gap-1"><Icons.Shuffle className="w-3 h-3" /> Próxima: Aleatória</span>
+                  ) : (
+                    <span>Próxima: {getNextTrackTitle()}</span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Desktop Only Barra de Progresso Interativa */}
+            <div className="hidden md:flex w-full items-center gap-3 text-xs text-[#E0E0E0] font-medium mt-1">
+              <span className="w-10 text-right">{formatTime(currentTime)}</span>
+              <div
+                className="flex-1 h-1.5 bg-[#333333] rounded-full relative cursor-pointer group"
+                onClick={handleSeek}
+              >
+                <div
+                  className="absolute top-0 left-0 h-full bg-[#FF6B35] rounded-full transition-all duration-100"
+                  style={{ width: `${(currentTime / duration) * 100 || 0}%` }}
+                />
+              </div>
+              <span className="w-10">{formatTime(duration)}</span>
+            </div>
+          </div>
+
+          {/* Controle de Volume - Desktop Only */}
+          <div className="flex items-center gap-3 w-1/4 justify-end hidden sm:flex">
+            <Icons.Volume className="w-5 h-5 text-[#E0E0E0]" />
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={volume}
+              onChange={(e) => onVolumeChange(parseInt(e.target.value))}
+              className="w-24 h-1 bg-[#333333] accent-[#FF6B35] rounded-full appearance-none cursor-pointer hover:accent-[#FF8B5E]"
+            />
+          </div>
         </div>
       </div>
     </div>
