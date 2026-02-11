@@ -214,14 +214,15 @@ const Player: React.FC<PlayerProps> = ({
 
               <button
                 onClick={() => onLike(currentAlbum.id, currentTrack.id)}
-                className="md:hidden p-1 text-[#E0E0E0]"
+                className="p-1 text-[#E0E0E0] hover:text-red-500 transition-colors"
+                title="Curtir"
               >
-                <Icons.Plus className="w-5 h-5" />
+                <Icons.Heart className={`w-5 h-5 ${currentTrack.isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
               </button>
 
               <button
                 onClick={onToggleRadio}
-                className={`hidden md:block transition-colors ${isRadioMode ? 'text-[#FF6B35]' : 'text-[#E0E0E0]'}`}
+                className={`transition-colors ${isRadioMode ? 'text-[#FF6B35]' : 'text-[#E0E0E0]'}`}
                 title="Radio MelodyHUB"
               >
                 <Icons.Radio className="w-5 h-5" />
@@ -229,28 +230,19 @@ const Player: React.FC<PlayerProps> = ({
             </div>
 
             {/* Radio / Shuffle / Next info */}
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex flex-col items-center gap-0.5 mt-1">
               {isRadioMode ? (
-                <div className="flex flex-col items-center">
-                  <span className="text-[9px] md:text-sm text-[#FF6B35]/80 font-bold uppercase tracking-widest flex items-center gap-1">
-                    <Icons.Radio className="w-3 h-3" /> Radio MelodyHUB Ativa
-                  </span>
-                  <div className="md:hidden flex items-center gap-3 text-[9px] text-[#E0E0E0]/40 font-mono mt-0.5">
-                    <span>Próx. música</span>
-                    <span className="w-12 h-1 bg-[#333333] rounded-full overflow-hidden">
-                      <div className="h-full bg-[#E0E0E0]/20 w-1/3" />
-                    </span>
-                    <span>{formatTime(currentTime)} / {formatTime(duration)}</span>
-                  </div>
-                </div>
+                <span className="text-[9px] md:text-xs text-[#FF6B35] font-bold uppercase tracking-widest flex items-center gap-1">
+                  <Icons.Radio className="w-3 h-3" /> Radio MelodyHUB Ativa
+                </span>
               ) : (
-                <div className="hidden md:block text-xs text-[#E0E0E0]/60 -mt-1 h-4">
+                <span className="text-[9px] md:text-xs text-[#E0E0E0]/60 h-4">
                   {isShuffle ? (
                     <span className="flex items-center gap-1"><Icons.Shuffle className="w-3 h-3" /> Próxima: Aleatória</span>
                   ) : (
                     <span>Próxima: {getNextTrackTitle()}</span>
                   )}
-                </div>
+                </span>
               )}
             </div>
 
