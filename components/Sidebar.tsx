@@ -33,7 +33,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, isOpen, on
       {/* Mobile Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-black/70 z-40 md:hidden backdrop-blur-md"
           onClick={onClose}
         />
       )}
@@ -49,8 +49,8 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, isOpen, on
             <img src="/logo.png" alt="MelodiaHub" className="h-10 md:h-20 w-auto" />
           </div>
           {/* Mobile Close Button */}
-          <button onClick={onClose} className="md:hidden text-[#E0E0E0] hover:text-white">
-            <Icons.Close className="w-6 h-6" />
+          <button onClick={onClose} className="md:hidden text-[#E0E0E0] hover:text-white p-2 bg-[#333333]/30 rounded-full transition-colors shrink-0">
+            <Icons.Close className="w-5 h-5" />
           </button>
         </div>
 
@@ -98,9 +98,9 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, isOpen, on
                 onViewChange('LOGIN');
                 onClose();
               }}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#333333] hover:bg-[#444444] text-white transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#FF6B35] hover:bg-[#FF8B5E] text-white shadow-lg transition-all active:scale-95"
             >
-              <span className="font-medium">Entrar</span>
+              <span className="font-bold tracking-wide">Entrar</span>
             </button>
           )}
         </div>

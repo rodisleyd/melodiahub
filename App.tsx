@@ -413,12 +413,12 @@ const AppContent: React.FC = () => {
       </div>
       <div className="space-y-2">
         {playlist.tracks.length === 0 ? (
-          <p className="text-[#E0E0E0]/50 text-sm italic">Playlist vazia.</p>
+          <p className="text-[#E0E0E0]/70 text-sm italic">Playlist vazia.</p>
         ) : (
           playlist.tracks.slice(0, 5).map((track, idx) => (
             <div key={`${playlist.id}-${track.id}-${idx}`} className="flex items-center justify-between p-2 rounded-lg hover:bg-[#333333]/60 transition-colors">
               <div className="flex items-center gap-3 overflow-hidden">
-                <span className="text-xs font-mono text-[#E0E0E0]/50 w-4">{(idx + 1).toString().padStart(2, '0')}</span>
+                <span className="text-xs font-mono text-[#E0E0E0]/70 w-4">{(idx + 1).toString().padStart(2, '0')}</span>
                 <span className="text-sm font-medium text-white truncate">{track.title}</span>
               </div>
               <button onClick={() => handlePlayPlaylist(playlist, idx)} className="p-1.5 hover:text-[#FF6B35] transition-colors">
@@ -456,13 +456,13 @@ const AppContent: React.FC = () => {
       />
 
       {/* Mobile Top Bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-[#1A1A2E] border-b border-[#333333] px-4 py-3 flex items-center justify-between shadow-2xl">
-        <div className="flex items-center gap-2">
-          <img src="/logo.png" alt="MelodiaHub" className="h-6 w-auto" />
-          <span className="text-sm font-bold tracking-widest text-[#E0E0E0] uppercase">melody<span className="text-[#FF6B35]">HUB</span></span>
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-[#1A1A2E] border-b border-[#333333] px-6 py-3 flex items-center justify-between shadow-2xl">
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="MelodiaHub" className="h-7 w-auto" />
+          <span className="text-sm font-bold tracking-widest text-[#E0E0E0] uppercase mt-0.5">melody<span className="text-[#FF6B35]">HUB</span></span>
         </div>
-        <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-white">
-          <Icons.Menu className="w-6 h-6" />
+        <button onClick={() => setIsSidebarOpen(true)} className="p-2 -mr-2 text-white hover:text-[#FF6B35]">
+          <Icons.Menu className="w-7 h-7" />
         </button>
       </div>
 
@@ -484,9 +484,9 @@ const AppContent: React.FC = () => {
                 </header>
 
                 {/* Search */}
-                <div className="mb-12 max-w-xl">
+                <div className="mb-12 max-w-2xl">
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                       <Icons.Search className="w-5 h-5 text-[#E0E0E0]" />
                     </div>
                     <input
@@ -494,7 +494,7 @@ const AppContent: React.FC = () => {
                       placeholder="Pesquisar..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="block w-full pl-12 pr-12 py-3 bg-[#333333]/20 border border-[#333333] rounded-2xl text-white outline-none focus:border-[#FF6B35] transition-all"
+                      className="block w-full pl-14 pr-12 py-3 bg-[#333333]/20 border border-[#333333] rounded-2xl text-white outline-none focus:border-[#FF6B35] transition-all"
                     />
                   </div>
                 </div>
@@ -565,7 +565,7 @@ const AppContent: React.FC = () => {
                 )}
 
                 <footer className="py-10 border-t border-[#333333]/50 text-center">
-                  <p className="text-[#E0E0E0]/30 text-[10px] font-medium tracking-widest uppercase">Desenvolvido por: 2026 - Rodisley Comunicação Visual</p>
+                  <p className="text-[#E0E0E0]/50 text-[10px] font-medium tracking-widest uppercase">Desenvolvido por: 2026 - Rodisley Comunicação Visual</p>
                 </footer>
               </div>
             )}
@@ -603,9 +603,9 @@ const AppContent: React.FC = () => {
                       <div className="flex-1">
                         <h3 className="text-xl font-semibold">{album.title}</h3>
                         <p className="text-[#E0E0E0]">{album.artist}</p>
-                        <div className="flex gap-4 mt-4">
-                          <button onClick={() => handleEditClick(album)} className="text-xs font-bold text-[#FF6B35]">EDITAR</button>
-                          <button onClick={() => handleDeleteClick(album.id)} className="text-xs font-bold text-red-500">EXCLUIR</button>
+                        <div className="flex gap-3 mt-4">
+                          <button onClick={() => handleEditClick(album)} className="text-xs font-bold text-[#FF6B35] hover:bg-[#FF6B35]/10 px-4 py-2 rounded-lg border border-[#FF6B35]/20 transition-colors">EDITAR</button>
+                          <button onClick={() => handleDeleteClick(album.id)} className="text-xs font-bold text-red-500 hover:bg-red-500/10 px-4 py-2 rounded-lg border border-red-500/20 transition-colors">EXCLUIR</button>
                         </div>
                       </div>
                     </div>

@@ -165,56 +165,62 @@ const Player: React.FC<PlayerProps> = ({
                   </span>
                 )}
               </div>
-              <p className="text-[10px] md:text-xs text-[#E0E0E0]/60 truncate">{currentAlbum.artist} {currentTrack.isFavorite ? '❤️' : ''}</p>
+              <p className="text-[10px] md:text-xs text-[#E0E0E0]/80 truncate leading-relaxed">{currentAlbum.artist} {currentTrack.isFavorite ? '❤️' : ''}</p>
               {isRadioMode && (
-                <div className="md:hidden flex items-center gap-1 mt-0.5">
-                  <span className="text-[#FF6B35] text-[8px] font-bold uppercase tracking-wider">Radio</span>
+                <div className="md:hidden flex items-center gap-1 mt-1">
+                  <span className="text-[#FF6B35] text-[9px] font-bold uppercase tracking-wider bg-[#FF6B35]/10 px-1.5 py-0.5 rounded">Radio</span>
                 </div>
               )}
             </div>
           </div>
 
           {/* Controles Principais */}
-          <div className="flex-1 flex flex-col items-center justify-center gap-0.5 max-w-xl">
-            <div className="flex items-center gap-4 sm:gap-6 md:gap-8">
+          <div className="flex-1 flex flex-col items-center justify-center gap-2 max-w-xl">
+            {/* Top row of secondary controls on Mobile */}
+            <div className="flex md:hidden items-center justify-center gap-6 w-full px-2 mb-1">
+              <button onClick={onToggleShuffle} className={`transition-colors p-2 ${isShuffle ? 'text-[#FF6B35]' : 'text-[#E0E0E0]'}`}>
+                <Icons.Shuffle className="w-5 h-5" />
+              </button>
+              <button onClick={() => onLike(currentAlbum.id, currentTrack.id)} className="p-2 text-[#E0E0E0] hover:text-red-500 transition-colors">
+                <Icons.Heart className={`w-5 h-5 ${currentTrack.isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
+              </button>
+              <button onClick={onToggleRadio} className={`transition-colors p-2 ${isRadioMode ? 'text-[#FF6B35]' : 'text-[#E0E0E0]'}`}>
+                <Icons.Radio className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-6 md:gap-8">
               <button
                 onClick={onToggleShuffle}
-                className={`hidden md:block transition-colors ${isShuffle ? 'text-[#FF6B35]' : 'text-[#E0E0E0]'}`}
+                className={`hidden md:block transition-colors hover:text-[#FF6B35] ${isShuffle ? 'text-[#FF6B35]' : 'text-[#E0E0E0]'}`}
                 title="Aleatório"
               >
                 <Icons.Shuffle className="w-5 h-5" />
               </button>
 
-              <button
-                onClick={onToggleShuffle}
-                className="md:hidden text-[#E0E0E0]/40"
-              >
-                <Icons.Shuffle className="w-4 h-4" />
-              </button>
-
-              <button onClick={onPrev} className="text-[#E0E0E0] hover:text-[#FF6B35] transition-colors">
-                <Icons.SkipBack className="w-5 h-5 md:w-6 md:h-6" />
+              <button onClick={onPrev} className="text-[#E0E0E0] hover:text-[#FF6B35] transition-colors p-2 md:p-0">
+                <Icons.SkipBack className="w-7 h-7 md:w-6 md:h-6" />
               </button>
 
               <button
                 onClick={onTogglePlay}
-                className="w-10 h-10 md:w-14 md:h-14 rounded-full bg-[#FF6B35] flex items-center justify-center text-white shadow-lg hover:scale-105 active:scale-95 transition-all"
+                className="w-14 h-14 md:w-14 md:h-14 rounded-full bg-[#FF6B35] flex items-center justify-center text-white shadow-lg hover:scale-105 active:scale-95 transition-all"
                 aria-label={isPlaying ? "Pausar" : "Reproduzir"}
               >
                 {isPlaying ? (
-                  <Icons.Pause className="w-5 h-5 md:w-7 md:h-7" />
+                  <Icons.Pause className="w-6 h-6 md:w-7 md:h-7" />
                 ) : (
-                  < Icons.Play className="w-5 h-5 md:w-7 md:h-7 ml-0.5 md:ml-1" />
+                  <Icons.Play className="w-6 h-6 md:w-7 md:h-7 ml-1" />
                 )}
               </button>
 
-              <button onClick={onNext} className="text-[#E0E0E0] hover:text-[#FF6B35] transition-colors">
-                <Icons.SkipForward className="w-5 h-5 md:w-6 md:h-6" />
+              <button onClick={onNext} className="text-[#E0E0E0] hover:text-[#FF6B35] transition-colors p-2 md:p-0">
+                <Icons.SkipForward className="w-7 h-7 md:w-6 md:h-6" />
               </button>
 
               <button
                 onClick={() => onLike(currentAlbum.id, currentTrack.id)}
-                className="p-1 text-[#E0E0E0] hover:text-red-500 transition-colors"
+                className="hidden md:block p-1 text-[#E0E0E0] hover:text-red-500 transition-colors"
                 title="Curtir"
               >
                 <Icons.Heart className={`w-5 h-5 ${currentTrack.isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
@@ -222,7 +228,7 @@ const Player: React.FC<PlayerProps> = ({
 
               <button
                 onClick={onToggleRadio}
-                className={`transition-colors ${isRadioMode ? 'text-[#FF6B35]' : 'text-[#E0E0E0]'}`}
+                className={`hidden md:block transition-colors hover:text-[#FF6B35] ${isRadioMode ? 'text-[#FF6B35]' : 'text-[#E0E0E0]'}`}
                 title="Radio MelodyHUB"
               >
                 <Icons.Radio className="w-5 h-5" />
