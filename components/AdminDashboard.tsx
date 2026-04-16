@@ -21,7 +21,7 @@ const GENRES = [
 ];
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit, onUpdateAlbum }) => {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const isAdmin = user?.role === 'admin';
   const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'ALBUMS' | 'USERS'>('ALBUMS');
 
@@ -207,7 +207,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit
       }
     } catch (error: any) {
       console.error("Erro ao salvar álbum:", error);
-      alert("Erro ao salvar álbum. Verifique sua conexão ou permissões.");
+      const errorMessage = error.message || "Verifique sua conexão ou permissões.";
+      alert(`Erro ao salvar álbum: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -216,6 +217,26 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit
   const fileInputRef = useRef<HTMLInputElement>(null);
   const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); };
   const handleImageAreaClick = () => { fileInputRef.current?.click(); };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="max-w-4xl mx-auto py-20 px-6 text-center animate-in fade-in slide-in-from-bottom-4">
+        <div className="bg-[#333333]/20 p-12 rounded-3xl border border-[#333333] backdrop-blur-md">
+          <div className="p-6 bg-[#FF6B35]/10 text-[#FF6B35] rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+            <Icons.User className="w-10 h-10" />
+          </div>
+          <h2 className="text-3xl font-bold mb-4">Sessão Expirada</h2>
+          <p className="text-[#E0E0E0] mb-8 text-lg">Você precisa estar logado para acessar o Estúdio de Criação e gerenciar seus álbuns.</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-[#FF6B35] text-white px-10 py-4 rounded-2xl font-bold text-lg hover:shadow-xl hover:shadow-[#FF6B35]/20 hover:-translate-y-1 transition-all"
+          >
+            Ir para o Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto pb-32 animate-in fade-in slide-in-from-bottom-4 duration-700">

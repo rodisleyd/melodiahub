@@ -216,7 +216,7 @@ const AppContent: React.FC = () => {
   };
 
   const handleViewChange = (view: ViewType) => {
-    if ((view === 'ADMIN_CREATE' || view === 'SETTINGS') && !isAuthenticated) {
+    if ((view === 'ADMIN_CREATE' || view === 'EDIT_ALBUM' || view === 'SETTINGS') && !isAuthenticated) {
       setCurrentView('LOGIN');
       return;
     }
