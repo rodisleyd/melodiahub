@@ -96,8 +96,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit
   const handleMigrateURLs = async () => {
     if (!confirm('Deseja iniciar a migração das URLs de melodiahub-80963 para melodyhub-8be7b?')) return;
     
-    setMigrationStatus({ loading: true, message: 'Migrando URLs...' });
-    const result = await dbService.migrateStorageURLs('melodiahub-80963.appspot.com', 'melodyhub-8be7b.firebasestorage.app');
+    setMigrationStatus({ loading: true, message: 'Gerando novos links seguros...' });
+    const result = await dbService.migrateStorageURLs();
     
     if (result.success) {
       setMigrationStatus({ loading: false, message: `Sucesso! ${result.count} álbuns atualizados.` });

@@ -211,7 +211,7 @@ export const dbService = {
     },
 
     // Migration
-    migrateStorageURLs: async (oldBucket: string, newBucket: string): Promise<{ success: boolean, count: number, error?: any }> => {
+    migrateStorageURLs: async (): Promise<{ success: boolean, count: number, error?: any }> => {
         try {
             const querySnapshot = await getDocs(collection(db, ALBUMS_COLLECTION));
             let updateCount = 0;
@@ -220,26 +220,58 @@ export const dbService = {
                 const album = { id: docSnapshot.id, ...docSnapshot.data() } as Album;
                 let needsUpdate = false;
 
-                console.log(`Analisando álbum: ${album.title}`);
-                console.log(`Cover URL atual: ${album.coverUrl}`);
+                console.log(`Processando álbum: ${album.title}`);
+
+                // Helper function to extract path from old URL or use current path
+                const getStoragePath = (url: string) => {
+                    if (!url) return null;
+                    try {
+                        // If it's a firebase storage URL, the path is between /o/ and ?
+                        const match = url.match(/\/o\/(.+?)\?/);
+                        if (match && match[1]) {
+                            return decodeURIComponent(match[1]);
+                        }
+                        // Fallback: try to guess from the URL if it contains 'covers/' or 'tracks/'
+                        if (url.includes('covers/')) return 'covers/' + url.split('covers/')[1].split('?')[0];
+                        if (url.includes('tracks/')) return 'tracks/' + url.split('tracks/')[1].split('?')[0];
+                    } catch (e) {
+                        console.error("Error parsing path from URL:", url, e);
+                    }
+                    return null;
+                };
 
                 // Update Cover URL
-                if (album.coverUrl && album.coverUrl.includes(oldBucket)) {
-                    console.log(`-> Corrigindo capa: ${album.coverUrl}`);
-                    album.coverUrl = album.coverUrl.replace(oldBucket, newBucket);
-                    needsUpdate = true;
+                const coverPath = getStoragePath(album.coverUrl);
+                if (coverPath) {
+                    try {
+                        const coverRef = ref(storage, coverPath);
+                        const newUrl = await getDownloadURL(coverRef);
+                        album.coverUrl = newUrl;
+                        needsUpdate = true;
+                        console.log(`Nova URL da capa gerada.`);
+                    } catch (e) {
+                        console.warn(`Não foi possível gerar URL para a capa: ${coverPath}`);
+                    }
                 }
 
                 // Update Tracks URLs
                 if (album.tracks && album.tracks.length > 0) {
-                    album.tracks = album.tracks.map(track => {
-                        if (track.url && track.url.includes(oldBucket)) {
-                            console.log(`-> Corrigindo faixa: ${track.title}`);
-                            needsUpdate = true;
-                            return { ...track, url: track.url.replace(oldBucket, newBucket) };
+                    const updatedTracks = [...album.tracks];
+                    for (let i = 0; i < updatedTracks.length; i++) {
+                        const trackPath = getStoragePath(updatedTracks[i].url);
+                        if (trackPath) {
+                            try {
+                                const trackRef = ref(storage, trackPath);
+                                const newUrl = await getDownloadURL(trackRef);
+                                updatedTracks[i] = { ...updatedTracks[i], url: newUrl };
+                                needsUpdate = true;
+                                console.log(`Nova URL da faixa "${updatedTracks[i].title}" gerada.`);
+                            } catch (e) {
+                                console.warn(`Não foi possível gerar URL para a faixa: ${trackPath}`);
+                            }
                         }
-                        return track;
-                    });
+                    }
+                    album.tracks = updatedTracks;
                 }
 
                 if (needsUpdate) {
