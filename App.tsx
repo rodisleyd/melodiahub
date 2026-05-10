@@ -50,7 +50,7 @@ const AppContent: React.FC = () => {
   const [radioPlaysCount, setRadioPlaysCount] = useState(0);
   const [showCommercial, setShowCommercial] = useState(false);
 
-  const COMMERCIAL_URL = "https://firebasestorage.googleapis.com/v0/b/melodiahub-80963.appspot.com/o/ads%2Fcommercial.mp4?alt=media";
+  const COMMERCIAL_URL = "https://firebasestorage.googleapis.com/v0/b/melodyhub-8be7b.firebasestorage.app/o/ads%2Fcommercial.mp4?alt=media";
   const PLAYS_BEFORE_AD = 5;
 
   const { user, isAuthenticated, isLoading: isAuthLoading, logout } = useAuth();

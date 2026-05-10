@@ -53,6 +53,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit
   // Temporary storage for files to upload
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [trackFiles, setTrackFiles] = useState<Map<string, File>>(new Map());
+  const [migrationStatus, setMigrationStatus] = useState<{ loading: boolean, message: string }>({ loading: false, message: '' });
 
   // Load Data on Mount
   useEffect(() => {
@@ -90,6 +91,22 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit
     const newRole = currentRole === 'admin' ? 'user' : 'admin';
     await dbService.updateUserRole(userId, newRole);
     loadUsers(); // Refresh
+  };
+
+  const handleMigrateURLs = async () => {
+    if (!confirm('Deseja iniciar a migração das URLs de melodiahub-80963 para melodyhub-8be7b?')) return;
+    
+    setMigrationStatus({ loading: true, message: 'Migrando URLs...' });
+    const result = await dbService.migrateStorageURLs('melodiahub-80963.appspot.com', 'melodyhub-8be7b.firebasestorage.app');
+    
+    if (result.success) {
+      setMigrationStatus({ loading: false, message: `Sucesso! ${result.count} álbuns atualizados.` });
+      loadStats();
+    } else {
+      setMigrationStatus({ loading: false, message: 'Erro na migração. Verifique o console.' });
+    }
+    
+    setTimeout(() => setMigrationStatus({ loading: false, message: '' }), 5000);
   };
 
   // ... file handlers ...
@@ -254,7 +271,31 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit
         )}
       </div>
 
-      {activeTab === 'OVERVIEW' && (
+      {/* Seção de Manutenção - Liberada para correção */}
+      <div className="bg-[#FF6B35]/5 border border-[#FF6B35]/20 p-8 rounded-3xl mb-8">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <h3 className="text-xl font-bold text-white mb-2">Manutenção do Banco de Dados</h3>
+            <p className="text-[#E0E0E0] text-sm max-w-xl">
+              Use o botão ao lado para atualizar os links das músicas e capas para o novo projeto (**melodyhub-8be7b**).
+            </p>
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            <button
+              onClick={handleMigrateURLs}
+              disabled={migrationStatus.loading}
+              className="bg-[#FF6B35] text-white px-8 py-3 rounded-2xl font-bold hover:shadow-lg hover:shadow-[#FF6B35]/20 transition-all disabled:opacity-50"
+            >
+              {migrationStatus.loading ? 'Processando...' : 'Corrigir URLs de Mídia'}
+            </button>
+            {migrationStatus.message && (
+              <p className="text-xs font-bold text-[#FF6B35] animate-pulse">{migrationStatus.message}</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {activeTab === 'OVERVIEW' && isAdmin && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-[#333333]/20 p-8 rounded-3xl border border-[#333333]">
             <div className="flex items-center gap-4 mb-4">
@@ -282,6 +323,29 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddAlbum, albumToEdit
               <h3 className="text-xl font-semibold text-[#E0E0E0]">Álbuns</h3>
             </div>
             <p className="text-5xl font-bold text-white">{stats.totalAlbums}</p>
+          </div>
+
+          <div className="md:col-span-3 bg-[#FF6B35]/5 border border-[#FF6B35]/20 p-8 rounded-3xl mt-4">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div>
+                <h3 className="text-xl font-bold text-white mb-2">Manutenção do Banco de Dados</h3>
+                <p className="text-[#E0E0E0] text-sm max-w-xl">
+                  Se você migrou de projeto, use o botão ao lado para atualizar os links das músicas e capas para o novo bucket (**melodyhub-8be7b**).
+                </p>
+              </div>
+              <div className="flex flex-col items-end gap-2">
+                <button
+                  onClick={handleMigrateURLs}
+                  disabled={migrationStatus.loading}
+                  className="bg-[#FF6B35] text-white px-8 py-3 rounded-2xl font-bold hover:shadow-lg hover:shadow-[#FF6B35]/20 transition-all disabled:opacity-50"
+                >
+                  {migrationStatus.loading ? 'Processando...' : 'Corrigir URLs de Mídia'}
+                </button>
+                {migrationStatus.message && (
+                  <p className="text-xs font-bold text-[#FF6B35] animate-pulse">{migrationStatus.message}</p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}

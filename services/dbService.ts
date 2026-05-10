@@ -206,7 +206,47 @@ export const dbService = {
                 }
             });
         } catch (e) {
-            console.error("Error toggling like: ", e);
+    },
+
+    // Migration
+    migrateStorageURLs: async (oldBucket: string, newBucket: string): Promise<{ success: boolean, count: number, error?: any }> => {
+        try {
+            const querySnapshot = await getDocs(collection(db, ALBUMS_COLLECTION));
+            let updateCount = 0;
+
+            for (const docSnapshot of querySnapshot.docs) {
+                const album = { id: docSnapshot.id, ...docSnapshot.data() } as Album;
+                let needsUpdate = false;
+
+                // Update Cover URL
+                if (album.coverUrl && album.coverUrl.includes(oldBucket)) {
+                    album.coverUrl = album.coverUrl.replace(oldBucket, newBucket);
+                    needsUpdate = true;
+                }
+
+                // Update Tracks URLs
+                if (album.tracks && album.tracks.length > 0) {
+                    album.tracks = album.tracks.map(track => {
+                        if (track.url && track.url.includes(oldBucket)) {
+                            needsUpdate = true;
+                            return { ...track, url: track.url.replace(oldBucket, newBucket) };
+                        }
+                        return track;
+                    });
+                }
+
+                if (needsUpdate) {
+                    const albumRef = doc(db, ALBUMS_COLLECTION, album.id);
+                    const { id, ...data } = album;
+                    await updateDoc(albumRef, data);
+                    updateCount++;
+                }
+            }
+
+            return { success: true, count: updateCount };
+        } catch (e) {
+            console.error("Error migrating URLs: ", e);
+            return { success: false, count: 0, error: e };
         }
     }
 };
