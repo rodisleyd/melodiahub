@@ -206,6 +206,8 @@ export const dbService = {
                 }
             });
         } catch (e) {
+            console.error("Error toggling like: ", e);
+        }
     },
 
     // Migration
