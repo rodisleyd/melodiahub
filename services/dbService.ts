@@ -220,8 +220,12 @@ export const dbService = {
                 const album = { id: docSnapshot.id, ...docSnapshot.data() } as Album;
                 let needsUpdate = false;
 
+                console.log(`Analisando álbum: ${album.title}`);
+                console.log(`Cover URL atual: ${album.coverUrl}`);
+
                 // Update Cover URL
                 if (album.coverUrl && album.coverUrl.includes(oldBucket)) {
+                    console.log(`-> Corrigindo capa: ${album.coverUrl}`);
                     album.coverUrl = album.coverUrl.replace(oldBucket, newBucket);
                     needsUpdate = true;
                 }
@@ -230,6 +234,7 @@ export const dbService = {
                 if (album.tracks && album.tracks.length > 0) {
                     album.tracks = album.tracks.map(track => {
                         if (track.url && track.url.includes(oldBucket)) {
+                            console.log(`-> Corrigindo faixa: ${track.title}`);
                             needsUpdate = true;
                             return { ...track, url: track.url.replace(oldBucket, newBucket) };
                         }
