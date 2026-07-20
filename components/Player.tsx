@@ -36,8 +36,16 @@ const Player: React.FC<PlayerProps> = ({
   const playCountedRef = useRef<string | null>(null); // Track ID of last counted play
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [audioError, setAudioError] = useState<string | null>(null);
+  const [isDemoMode, setIsDemoMode] = useState(false);
 
   const currentTrack = currentAlbum?.tracks[currentTrackIndex];
+
+  // Reset audio error and demo mode when changing tracks
+  useEffect(() => {
+    setAudioError(null);
+    setIsDemoMode(false);
+  }, [currentTrackIndex, currentAlbum?.id]);
 
   // Calculate next track for display
   const getNextTrackTitle = () => {
@@ -123,6 +131,31 @@ const Player: React.FC<PlayerProps> = ({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const handleAudioError = (e: React.SyntheticEvent<HTMLAudioElement, Event>) => {
+    const target = e.currentTarget;
+    console.warn("Erro ao carregar áudio do Firebase:", target.error);
+    
+    // Se a música for do Firebase (contendo firebasestorage.googleapis.com) e falhar
+    if (currentTrack?.url && currentTrack.url.includes("firebasestorage.googleapis.com") && !isDemoMode) {
+      setAudioError("Mídia indisponível no servidor. Ativando demonstração local...");
+      setIsDemoMode(true);
+      
+      // Carrega uma música pública funcional baseada no índice
+      const songNumber = (currentTrackIndex % 8) + 1;
+      const fallbackUrl = `https://www.soundhelix.com/examples/mp3/SoundHelix-Song-${songNumber}.mp3`;
+      
+      target.src = fallbackUrl;
+      target.load();
+      if (isPlaying) {
+        target.play().catch(err => console.error("Erro ao tocar fallback:", err));
+      }
+    } else if (isDemoMode) {
+      setAudioError("Erro ao carregar a mídia de demonstração.");
+    } else {
+      setAudioError("Não foi possível carregar o áudio selecionado.");
+    }
+  };
+
   if (!currentAlbum || !currentTrack) return null;
 
   return (
@@ -133,7 +166,15 @@ const Player: React.FC<PlayerProps> = ({
         onTimeUpdate={handleTimeUpdate}
         onEnded={onNext}
         onLoadedMetadata={handleTimeUpdate}
+        onError={handleAudioError}
       />
+
+      {audioError && (
+        <div className="bg-[#FF6B35]/20 border-b border-[#FF6B35]/30 text-center py-1.5 text-[10px] md:text-xs font-bold text-[#FF8B5E] animate-pulse flex items-center justify-center gap-1.5 leading-none">
+          <Icons.Radio className="w-3.5 h-3.5" />
+          {audioError}
+        </div>
+      )}
 
       {/* Progress Bar (at the very top of the player on mobile, but part of the box) */}
       <div

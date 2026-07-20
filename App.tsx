@@ -137,7 +137,12 @@ const AppContent: React.FC = () => {
     const albumToUpdate = albums.find(a => a.id === albumId);
     if (albumToUpdate) {
       const updatedAlbum = { ...albumToUpdate, isFavorite: !albumToUpdate.isFavorite };
-      await dbService.updateAlbum(updatedAlbum);
+      try {
+        await dbService.updateAlbum(updatedAlbum);
+      } catch (err) {
+        console.error("Erro ao favoritar álbum:", err);
+        alert("Apenas administradores podem favoritar álbuns globalmente no servidor.");
+      }
     }
   };
 
@@ -194,14 +199,24 @@ const AppContent: React.FC = () => {
 
   const handleAddAlbum = async (newAlbum: Album) => {
     const { id, ...albumData } = newAlbum;
-    await dbService.addAlbum(albumData);
-    setCurrentView('EXPLORE');
+    try {
+      await dbService.addAlbum(albumData);
+      setCurrentView('EXPLORE');
+    } catch (err) {
+      console.error("Erro ao adicionar álbum:", err);
+      alert("Erro ao adicionar álbum. Verifique se você possui permissões de administrador.");
+    }
   };
 
   const handleUpdateAlbum = async (updatedAlbum: Album) => {
-    await dbService.updateAlbum(updatedAlbum);
-    setEditingAlbum(null);
-    setCurrentView('MY_ALBUMS');
+    try {
+      await dbService.updateAlbum(updatedAlbum);
+      setEditingAlbum(null);
+      setCurrentView('MY_ALBUMS');
+    } catch (err) {
+      console.error("Erro ao atualizar álbum:", err);
+      alert("Erro ao atualizar álbum. Verifique se você possui permissões de administrador.");
+    }
   };
 
   const handleEditClick = (album: Album) => {
@@ -211,7 +226,12 @@ const AppContent: React.FC = () => {
 
   const handleDeleteClick = async (albumId: string) => {
     if (confirm('Tem certeza que deseja excluir este álbum?')) {
-      await dbService.deleteAlbum(albumId);
+      try {
+        await dbService.deleteAlbum(albumId);
+      } catch (err) {
+        console.error("Erro ao excluir álbum:", err);
+        alert("Erro ao excluir álbum. Verifique se você possui permissões de administrador.");
+      }
     }
   };
 
