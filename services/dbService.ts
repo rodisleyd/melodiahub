@@ -86,10 +86,43 @@ export const dbService = {
 
     // Storage
     uploadFile: async (file: File, path: string): Promise<string> => {
-        const storageRef = ref(storage, `${path}/${Date.now()}_${file.name}`);
-        const snapshot = await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(snapshot.ref);
-        return downloadURL;
+        const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+        const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+        if (!cloudName || !uploadPreset) {
+            throw new Error("Credenciais do Cloudinary não encontradas no arquivo .env");
+        }
+
+        // Determina o tipo de recurso. O Cloudinary armazena áudios sob a API 'video'
+        // e imagens sob 'image'.
+        let resourceType = "auto";
+        if (file.type.startsWith("image/")) {
+            resourceType = "image";
+        } else if (file.type.startsWith("audio/")) {
+            resourceType = "video"; // Cloudinary trata áudio como video na API de upload
+        }
+
+        const url = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`;
+        
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", uploadPreset);
+
+        console.log(`Iniciando upload para o Cloudinary (${resourceType})...`);
+        const response = await fetch(url, {
+            method: "POST",
+            body: formData
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Erro no upload do Cloudinary:", errorText);
+            throw new Error(`Falha no upload para o Cloudinary: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log("Upload concluído com sucesso no Cloudinary!", data.secure_url);
+        return data.secure_url;
     },
 
     // Stats & Ranking
